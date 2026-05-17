@@ -5,29 +5,35 @@ import { getCached, setCached } from '../lib/cache.js';
 import { printJson, printVehiclesTable } from '../lib/format.js';
 import type { VehiclesData } from '../types.js';
 
+export async function getVehicles({ useCache = true, cacheAll = false }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
+  const resolvedAppId = getAppId();
+  const endpoint = 'encyclopedia/vehicles';
+  const params = { application_id: resolvedAppId };
+
+  if (useCache) {
+    const cached = await getCached<VehiclesData>('list-vehicles', endpoint, params);
+    if (cached) return cached;
+  }
+
+  const data = await fetchVehicles(resolvedAppId);
+
+  if (useCache) {
+    const toCache = cacheAll ? data : Object.fromEntries(Object.entries(data).slice(0, 3));
+    await setCached('list-vehicles', endpoint, params, toCache);
+  }
+
+  return data;
+}
+
 export function listVehiclesCommand(): Command {
   return new Command('list-vehicles')
     .description('List all vehicles from the WoT encyclopedia')
     .option('--table', 'render output as a table')
-    .option('--app-id <id>', 'Wargaming application ID (overrides WG_APP_ID)')
     .option('--no-cache', 'bypass cache and fetch fresh data')
+    .option('--all', 'cache all vehicles (default: only first 3 are cached)')
     .action(async (options) => {
       try {
-        const appId = getAppId(options.appId);
-        const endpoint = 'encyclopedia/vehicles';
-        const params = { application_id: appId };
-
-        let data: VehiclesData | null = null;
-        if (options.cache) {
-          data = await getCached<VehiclesData>(endpoint, params);
-        }
-
-        if (!data) {
-          data = await fetchVehicles(appId);
-          if (options.cache) {
-            await setCached(endpoint, params, data);
-          }
-        }
+        const data = await getVehicles({ useCache: options.cache, cacheAll: options.all });
 
         if (options.table) {
           printVehiclesTable(data);

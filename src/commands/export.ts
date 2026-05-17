@@ -9,24 +9,23 @@ export function exportCommand(): Command {
   return new Command('export')
     .description('Export all vehicles to a JSON file')
     .option('--output <path>', 'output file path (default: wg-export-<timestamp>.json)')
-    .option('--app-id <id>', 'Wargaming application ID (overrides WG_APP_ID)')
     .option('--no-cache', 'bypass cache and fetch fresh data')
     .action(async (options) => {
       try {
-        const appId = getAppId(options.appId);
+        const appId = getAppId();
         const endpoint = 'encyclopedia/vehicles';
         const params = { application_id: appId };
         const outputPath: string = options.output ?? `wg-export-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 
         let data: VehiclesData | null = null;
         if (options.cache) {
-          data = await getCached<VehiclesData>(endpoint, params);
+          data = await getCached<VehiclesData>('export', endpoint, params);
         }
 
         if (!data) {
           data = await fetchVehicles(appId);
           if (options.cache) {
-            await setCached(endpoint, params, data);
+            await setCached('export', endpoint, params, data);
           }
         }
 

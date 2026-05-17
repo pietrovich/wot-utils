@@ -9,6 +9,7 @@ export interface Vehicle {
   images?: {
     preview?: string;
     normal?: string;
+    contour_icon?: string;
   };
 }
 

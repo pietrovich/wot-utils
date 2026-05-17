@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { Command } from 'commander';
 import { listVehiclesCommand } from './commands/list-vehicles.js';
 import { exportCommand } from './commands/export.js';
+import { fetchIconsCommand } from './commands/fetch-icons.js';
 import { purgeCache } from './lib/cache.js';
 
 const program = new Command();
@@ -11,6 +12,7 @@ program.name('wg-fetcher').description('Fetch World of Tanks data from the Warga
 
 program.addCommand(listVehiclesCommand());
 program.addCommand(exportCommand());
+program.addCommand(fetchIconsCommand());
 
 program
   .command('cache-purge')
