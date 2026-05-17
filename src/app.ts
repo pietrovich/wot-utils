@@ -1,9 +1,9 @@
 import { writeFile, mkdir, access } from 'node:fs/promises';
 import { join, dirname, basename } from 'node:path';
 import { getAppId } from './lib/config.js';
-import { fetchVehicles } from './lib/api.js';
+import { WGApiError } from './lib/api.js';
 import { getCached, setCached, purgeCache as purgeCacheLib } from './lib/cache.js';
-import type { VehiclesData } from './types.js';
+import type { VehiclesData, WGApiResponse } from './types.js';
 
 async function fileExists(path: string): Promise<boolean> {
   try {
@@ -24,30 +24,37 @@ async function downloadIcon(url: string, dest: string): Promise<void> {
 }
 
 export class App {
+  private readonly appId: string;
+
+  constructor() {
+    this.appId = getAppId();
+  }
+
   async getVehicles({ useCache = true, cacheAll = false }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
-    const appId = getAppId();
     const endpoint = 'encyclopedia/vehicles';
-    const params = { application_id: appId };
+    const limit = cacheAll ? undefined : 3;
+    const params: Record<string, string> = { application_id: this.appId };
+    if (limit) {
+      params.limit = String(limit);
+    }
 
     if (useCache) {
       const cached = await getCached<VehiclesData>('list-vehicles', endpoint, params);
       if (cached) return cached;
     }
 
-    const data = await fetchVehicles(appId);
+    const data = await this.fetchVehicles(limit);
 
     if (useCache) {
-      const toCache = cacheAll ? data : Object.fromEntries(Object.entries(data).slice(0, 3));
-      await setCached('list-vehicles', endpoint, params, toCache);
+      await setCached('list-vehicles', endpoint, params, data);
     }
 
     return data;
   }
 
   async exportVehicles({ output, useCache = true }: { output?: string; useCache?: boolean } = {}): Promise<void> {
-    const appId = getAppId();
     const endpoint = 'encyclopedia/vehicles';
-    const params = { application_id: appId };
+    const params = { application_id: this.appId };
     const outputPath = output ?? `wg-export-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 
     let data: VehiclesData | null = null;
@@ -56,7 +63,7 @@ export class App {
     }
 
     if (!data) {
-      data = await fetchVehicles(appId);
+      data = await this.fetchVehicles();
       if (useCache) {
         await setCached('export', endpoint, params, data);
       }
@@ -112,5 +119,23 @@ export class App {
 
   async purgeCache(): Promise<void> {
     await purgeCacheLib();
+  }
+
+  private async fetchVehicles(limit?: number): Promise<VehiclesData> {
+    const url = new URL('https://api.worldoftanks.eu/wot/encyclopedia/vehicles/');
+    url.searchParams.set('application_id', this.appId);
+    if (limit) {
+      url.searchParams.set('limit', String(limit));
+    }
+
+    const response = await fetch(url.toString());
+    const json = (await response.json()) as WGApiResponse<VehiclesData>;
+
+    if (json.status === 'error') {
+      const err = json.error!;
+      throw new WGApiError(err.field, err.code, err.message);
+    }
+
+    return json.data!;
   }
 }
