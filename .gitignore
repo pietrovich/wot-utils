@@ -1,0 +1,9 @@
+.idea/
+node_modules/
+dist/
+.env
+.data/
+.wg-data/
+.claude/settings.local.json
+*.js.map
+
