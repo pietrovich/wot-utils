@@ -1,25 +1,20 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import { Command } from 'commander';
+import { App } from './app.js';
 import { listVehiclesCommand } from './commands/list-vehicles.js';
 import { exportCommand } from './commands/export.js';
 import { fetchIconsCommand } from './commands/fetch-icons.js';
-import { purgeCache } from './lib/cache.js';
+import { cachePurgeCommand } from './commands/cache-purge.js';
 
+const app = new App();
 const program = new Command();
 
 program.name('wg-fetcher').description('Fetch World of Tanks data from the Wargaming API').version('0.1.0');
 
-program.addCommand(listVehiclesCommand());
-program.addCommand(exportCommand());
-program.addCommand(fetchIconsCommand());
-
-program
-  .command('cache-purge')
-  .description('Delete all cached API responses')
-  .action(async () => {
-    await purgeCache();
-    console.error('Cache purged.');
-  });
+program.addCommand(listVehiclesCommand(app));
+program.addCommand(exportCommand(app));
+program.addCommand(fetchIconsCommand(app));
+program.addCommand(cachePurgeCommand(app));
 
 await program.parseAsync();

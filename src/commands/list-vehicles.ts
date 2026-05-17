@@ -1,31 +1,9 @@
 import { Command } from 'commander';
-import { getAppId } from '../lib/config.js';
-import { fetchVehicles, WGApiError } from '../lib/api.js';
-import { getCached, setCached } from '../lib/cache.js';
+import { WGApiError } from '../lib/api.js';
 import { printJson, printVehiclesTable } from '../lib/format.js';
-import type { VehiclesData } from '../types.js';
+import type { App } from '../app.js';
 
-export async function getVehicles({ useCache = true, cacheAll = false }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
-  const resolvedAppId = getAppId();
-  const endpoint = 'encyclopedia/vehicles';
-  const params = { application_id: resolvedAppId };
-
-  if (useCache) {
-    const cached = await getCached<VehiclesData>('list-vehicles', endpoint, params);
-    if (cached) return cached;
-  }
-
-  const data = await fetchVehicles(resolvedAppId);
-
-  if (useCache) {
-    const toCache = cacheAll ? data : Object.fromEntries(Object.entries(data).slice(0, 3));
-    await setCached('list-vehicles', endpoint, params, toCache);
-  }
-
-  return data;
-}
-
-export function listVehiclesCommand(): Command {
+export function listVehiclesCommand(app: App): Command {
   return new Command('list-vehicles')
     .description('List all vehicles from the WoT encyclopedia')
     .option('--table', 'render output as a table')
@@ -33,7 +11,7 @@ export function listVehiclesCommand(): Command {
     .option('--all', 'cache all vehicles (default: only first 3 are cached)')
     .action(async (options) => {
       try {
-        const data = await getVehicles({ useCache: options.cache, cacheAll: options.all });
+        const data = await app.getVehicles({ useCache: options.cache, cacheAll: options.all });
 
         if (options.table) {
           printVehiclesTable(data);
