@@ -9,7 +9,10 @@ export function fetchIconsCommand(app: App): Command {
     .option('--concurrency <n>', 'parallel downloads', '10')
     .action(async (options) => {
       try {
-        await app.fetchIcons({ force: options.force, concurrency: Math.max(1, parseInt(options.concurrency, 10) || 10) });
+        await app.fetchIcons({
+          force: options.force,
+          concurrency: Math.max(1, parseInt(options.concurrency, 10) || 10),
+        });
       } catch (error) {
         if (error instanceof WGApiError) {
           console.error(`API error [${error.code}] ${error.field}: ${error.message}`);

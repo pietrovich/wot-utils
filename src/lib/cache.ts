@@ -19,7 +19,11 @@ interface CacheEntry<T> {
   data: T;
 }
 
-export async function getCached<T>(prefix: string, endpoint: string, params: Record<string, string>): Promise<T | null> {
+export async function getCached<T>(
+  prefix: string,
+  endpoint: string,
+  params: Record<string, string>,
+): Promise<T | null> {
   const file = join(getCacheDir(), `${cacheKey(prefix, endpoint, params)}.json`);
   try {
     const raw = await readFile(file, 'utf-8');
@@ -30,7 +34,12 @@ export async function getCached<T>(prefix: string, endpoint: string, params: Rec
   }
 }
 
-export async function setCached<T>(prefix: string, endpoint: string, params: Record<string, string>, data: T): Promise<void> {
+export async function setCached<T>(
+  prefix: string,
+  endpoint: string,
+  params: Record<string, string>,
+  data: T,
+): Promise<void> {
   const dir = getCacheDir();
   await mkdir(dir, { recursive: true });
   const file = join(dir, `${cacheKey(prefix, endpoint, params)}.json`);

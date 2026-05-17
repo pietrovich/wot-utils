@@ -8,6 +8,7 @@ import type { VehiclesData, WGApiResponse } from './types.js';
 async function fileExists(path: string): Promise<boolean> {
   try {
     await access(path);
+
     return true;
   } catch {
     return false;
@@ -19,6 +20,7 @@ async function downloadIcon(url: string, dest: string): Promise<void> {
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
   }
+
   const buffer = Buffer.from(await response.arrayBuffer());
   await writeFile(dest, buffer);
 }
@@ -30,7 +32,10 @@ export class App {
     this.appId = getAppId();
   }
 
-  async getVehicles({ useCache = true, cacheAll = false }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
+  async getVehicles({
+    useCache = true,
+    cacheAll = false,
+  }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
     const endpoint = 'encyclopedia/vehicles';
     const limit = cacheAll ? undefined : 3;
     const params: Record<string, string> = { application_id: this.appId };
@@ -40,7 +45,9 @@ export class App {
 
     if (useCache) {
       const cached = await getCached<VehiclesData>('list-vehicles', endpoint, params);
-      if (cached) return cached;
+      if (cached) {
+        return cached;
+      }
     }
 
     const data = await this.fetchVehicles(limit);
@@ -92,6 +99,7 @@ export class App {
           const url = vehicle.images?.contour_icon;
           if (!url) {
             skipped++;
+
             return;
           }
 
@@ -99,6 +107,7 @@ export class App {
 
           if (!force && (await fileExists(dest))) {
             skipped++;
+
             return;
           }
 
