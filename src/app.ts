@@ -38,7 +38,7 @@ export class App {
   }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
     const endpoint = 'encyclopedia/vehicles';
     const limit = cacheAll ? undefined : 3;
-    const params: Record<string, string> = { application_id: this.appId };
+    const params: Record<string, string> = {};
     if (limit) {
       params.limit = String(limit);
     }
@@ -131,13 +131,26 @@ export class App {
   }
 
   private async fetchVehicles(limit?: number): Promise<VehiclesData> {
+    const fields = [
+      '-crew',
+      '-default_profile',
+      '-description',
+      '-prices_xp',
+      '-price_gold',
+      '-price_credit',
+      '-next_tanks',
+    ].join(',');
+
     const url = new URL('https://api.worldoftanks.eu/wot/encyclopedia/vehicles/');
     url.searchParams.set('application_id', this.appId);
+    // url.searchParams.set('fields', fields);
+
     if (limit) {
       url.searchParams.set('limit', String(limit));
     }
 
-    const response = await fetch(url.toString());
+    const tmp = `${url.toString()}&fields=${fields}`;
+    const response = await fetch(tmp);
     const json = (await response.json()) as WGApiResponse<VehiclesData>;
 
     if (json.status === 'error') {
