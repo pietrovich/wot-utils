@@ -7,7 +7,9 @@ export function charsCommand(app: App): Command {
     .description('List unique characters found in vehicle short names')
     .action(async () => {
       try {
-        console.log(await app.getCharacters());
+        const { uniqueCharacters, maxLength } = await app.getShortNameStats();
+        console.log('uniqueCharacters:', uniqueCharacters);
+        console.log('maxLength:', maxLength);
       } catch (error) {
         if (error instanceof WGApiError) {
           console.error(`API error [${error.code}] ${error.field}: ${error.message}`);

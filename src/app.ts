@@ -183,15 +183,19 @@ export class App {
     return data;
   }
 
-  async getCharacters(): Promise<string> {
+  async getShortNameStats(): Promise<{ uniqueCharacters: string; maxLength: number }> {
     const vehicles = await this.getVehicles();
     const chars = new Set<string>();
+    let maxLength = 0;
     for (const v of vehicles) {
       for (const c of v.short_name) {
         chars.add(c);
       }
+      if (v.short_name.length > maxLength) {
+        maxLength = v.short_name.length;
+      }
     }
-    return [...chars].sort().join('');
+    return { uniqueCharacters: [...chars].sort().join(''), maxLength };
   }
 
   async purgeCache(): Promise<void> {
