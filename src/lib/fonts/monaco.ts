@@ -1,4 +1,4 @@
-import type { Font } from '../pixel-font.js';
+import type { Font } from '~/lib/pixel-font.js';
 
 // Extracted from Monaco screenshot, cell width varies (1-5), height 9
 export const monaco: Font = {

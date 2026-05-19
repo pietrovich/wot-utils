@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
-import { PixelFont } from '../lib/pixel-font.js';
-import { fonts } from '../lib/fonts/index.js';
-import { encodePng } from '../lib/png.js';
+import { PixelFont } from '~/lib/pixel-font.js';
+import { fonts } from '~/lib/fonts/index.js';
+import { encodePng } from '~/lib/png.js';
 
 const DEFAULT_SAMPLE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const CHAR_GAP = 1;

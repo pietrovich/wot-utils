@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { WGApiError } from '../lib/api.js';
-import type { App } from '../app.js';
+import { WGApiError } from '~/lib/api.js';
+import type { App } from '~/app.js';
 
 export function charsCommand(app: App): Command {
   return new Command('chars').description('List unique characters found in vehicle short names').action(async () => {

@@ -1,4 +1,4 @@
-import type { Font } from '../pixel-font.js';
+import type { Font } from '~/lib/pixel-font.js';
 
 export const minecraft: Font = {
   '(': [

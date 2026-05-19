@@ -1,5 +1,5 @@
 import Table from 'cli-table3';
-import type { Vehicle } from '../types.js';
+import type { Vehicle } from '~/types.js';
 
 export function printJson(data: unknown): void {
   console.log(JSON.stringify(data, null, 2));

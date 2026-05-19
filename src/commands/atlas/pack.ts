@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
-import { AtlasManager } from '../lib/atlas-manager.js';
+import { AtlasManager } from '~/lib/atlas-manager.js';
 
 export function packAtlasCommand(atlas: AtlasManager): Command {
   return new Command('pack')

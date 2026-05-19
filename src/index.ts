@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import { Command } from 'commander';
-import { App } from './app.js';
-import { listVehiclesCommand } from './commands/list-vehicles.js';
-import { exportCommand } from './commands/export.js';
-import { fetchIconsCommand } from './commands/fetch-icons.js';
-import { cachePurgeCommand } from './commands/cache-purge.js';
-import { bestConfigCommand } from './commands/best-config.js';
-import { vehicleStatsCommand } from './commands/vehicle-stats.js';
-import { charsCommand } from './commands/chars.js';
-import { renderCommand } from './commands/render.js';
-import { pickCommand } from './commands/pick.js';
-import { inspectAtlasCommand } from './commands/inspect-atlas.js';
-import { extractAtlasCommand } from './commands/extract-atlas.js';
-import { packAtlasCommand } from './commands/pack-atlas.js';
-import { AtlasManager } from './lib/atlas-manager.js';
+import { App } from '~/app.js';
+import { listVehiclesCommand } from '~/commands/vehicle/list.js';
+import { exportCommand } from '~/commands/vehicle/export.js';
+import { fetchIconsCommand } from '~/commands/vehicle/fetch-icons.js';
+import { cachePurgeCommand } from '~/commands/cache/purge.js';
+import { bestConfigCommand } from '~/commands/vehicle/best-config.js';
+import { vehicleStatsCommand } from '~/commands/vehicle/stats.js';
+import { charsCommand } from '~/commands/vehicle/chars.js';
+import { renderCommand } from '~/commands/font/render.js';
+import { pickCommand } from '~/commands/atlas/pick.js';
+import { inspectAtlasCommand } from '~/commands/atlas/inspect.js';
+import { extractAtlasCommand } from '~/commands/atlas/extract.js';
+import { packAtlasCommand } from '~/commands/atlas/pack.js';
+import { AtlasManager } from '~/lib/atlas-manager.js';
 
 const app = new App();
 const atlasManager = new AtlasManager();
