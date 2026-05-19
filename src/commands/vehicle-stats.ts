@@ -77,8 +77,8 @@ export function vehicleStatsCommand(app: App): Command {
     .action(async (query: string | undefined, options) => {
       try {
         if (!query || options.all) {
-          const vehicles = await app.getVehicles({ cacheAll: !!options.all });
-          const sorted = Object.values(vehicles).sort((a, b) => a.short_name.localeCompare(b.short_name));
+          const vehicles = await app.getVehicles();
+          const sorted = [...vehicles].sort((a, b) => a.short_name.localeCompare(b.short_name));
           const targets = options.all ? sorted : sorted.slice(0, 10);
 
           const rows: TableRow[] = [];

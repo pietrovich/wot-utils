@@ -27,36 +27,30 @@ async function downloadIcon(url: string, dest: string): Promise<void> {
 
 export class App {
   private readonly appId: string;
+  private readonly limitOutput: number = 10000;
+  private vehicles: VehiclesData | null = null;
 
   constructor() {
     this.appId = getAppId();
+    this.limitOutput = process.env.LIMIT_OUTPUT ? Number(process.env.LIMIT_OUTPUT) : 3;
   }
 
-  async getVehicles({
-    useCache = true,
-    cacheAll = false,
-  }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
-    const endpoint = 'encyclopedia/vehicles';
-    const limit = cacheAll ? undefined : 3;
-    const params: Record<string, string> = {};
-    if (limit) {
-      params.limit = String(limit);
-    }
+  async getVehicles(): Promise<Vehicle[]> {
+    if (!this.vehicles) {
+      const endpoint = 'encyclopedia/vehicles';
+      const cached = await getCached<VehiclesData>('list-vehicles', endpoint);
 
-    if (useCache) {
-      const cached = await getCached<VehiclesData>('list-vehicles', endpoint, params);
       if (cached) {
-        return cached;
+        this.vehicles = cached;
+        return Object.values(cached);
       }
+
+      this.vehicles = await this.fetchVehicles();
+
+      await setCached('list-vehicles', endpoint, {}, this.vehicles);
     }
 
-    const data = await this.fetchVehicles(limit);
-
-    if (useCache) {
-      await setCached('list-vehicles', endpoint, params, data);
-    }
-
-    return data;
+    return Object.values(this.vehicles);
   }
 
   async exportVehicles({ output, useCache = true }: { output?: string; useCache?: boolean } = {}): Promise<void> {
@@ -87,7 +81,7 @@ export class App {
     const iconsDir = join(dirname(cacheDir), 'contour-icons');
     await mkdir(iconsDir, { recursive: true });
 
-    const all = Object.values(vehicles);
+    const all = vehicles;
     let downloaded = 0;
     let skipped = 0;
     let failed = 0;
@@ -197,7 +191,7 @@ export class App {
     const vehicles = await this.getVehicles();
     const q = String(query);
     const isId = /^\d+$/.test(q);
-    const vehicle = Object.values(vehicles).find((v) => {
+    const vehicle = vehicles.find((v) => {
       if (isId) {
         return v.tank_id === Number(q);
       }
@@ -212,7 +206,7 @@ export class App {
     return vehicle;
   }
 
-  private async fetchVehicles(limit?: number): Promise<VehiclesData> {
+  private async fetchVehicles(): Promise<VehiclesData> {
     const fields = [
       '-crew',
       '-default_profile',
@@ -226,10 +220,6 @@ export class App {
     const url = new URL('https://api.worldoftanks.eu/wot/encyclopedia/vehicles/');
     url.searchParams.set('application_id', this.appId);
     // url.searchParams.set('fields', fields);
-
-    if (limit) {
-      url.searchParams.set('limit', String(limit));
-    }
 
     const tmp = `${url.toString()}&fields=${fields}`;
     const response = await fetch(tmp);

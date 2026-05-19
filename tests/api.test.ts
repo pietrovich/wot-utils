@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WGApiError } from '../src/lib/api.js';
 import { App } from '../src/app.js';
 
+vi.mock('../src/lib/cache.js', () => ({
+  getCached: vi.fn().mockResolvedValue(null),
+  setCached: vi.fn().mockResolvedValue(undefined),
+  purgeCache: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('App vehicle fetching', () => {
   beforeEach(() => {
     vi.stubEnv('WG_APP_ID', 'test-app-id');
@@ -19,8 +25,8 @@ describe('App vehicle fetching', () => {
       vi.fn().mockResolvedValue({ json: () => Promise.resolve({ status: 'ok', data: mockData }) }),
     );
 
-    const result = await new App().getVehicles({ useCache: false });
-    expect(result).toEqual(mockData);
+    const result = await new App().getVehicles();
+    expect(result).toEqual([{ tank_id: 1, name: 'T-34', tier: 5 }]);
   });
 
   it('throws WGApiError on API error response', async () => {
@@ -35,8 +41,8 @@ describe('App vehicle fetching', () => {
       }),
     );
 
-    await expect(new App().getVehicles({ useCache: false })).rejects.toThrow(WGApiError);
-    await expect(new App().getVehicles({ useCache: false })).rejects.toThrow('INVALID_APPLICATION_ID');
+    await expect(new App().getVehicles()).rejects.toThrow(WGApiError);
+    await expect(new App().getVehicles()).rejects.toThrow('INVALID_APPLICATION_ID');
   });
 
   it('includes application_id in the request URL', async () => {
@@ -45,7 +51,7 @@ describe('App vehicle fetching', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    await new App().getVehicles({ useCache: false });
+    await new App().getVehicles();
 
     const calledUrl: string = mockFetch.mock.calls[0][0];
     expect(calledUrl).toContain('application_id=test-app-id');

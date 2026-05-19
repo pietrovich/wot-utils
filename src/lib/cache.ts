@@ -22,7 +22,7 @@ interface CacheEntry<T> {
 export async function getCached<T>(
   prefix: string,
   endpoint: string,
-  params: Record<string, string>,
+  params: Record<string, string> = {},
 ): Promise<T | null> {
   const file = join(getCacheDir(), `${cacheKey(prefix, endpoint, params)}.json`);
   try {
