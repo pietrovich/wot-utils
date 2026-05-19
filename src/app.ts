@@ -183,6 +183,17 @@ export class App {
     return data;
   }
 
+  async getCharacters(): Promise<string> {
+    const vehicles = await this.getVehicles();
+    const chars = new Set<string>();
+    for (const v of vehicles) {
+      for (const c of v.short_name) {
+        chars.add(c);
+      }
+    }
+    return [...chars].sort().join('');
+  }
+
   async purgeCache(): Promise<void> {
     await purgeCacheLib();
   }
