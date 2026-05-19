@@ -1,4 +1,4 @@
-import type { Font } from './pixel-font.js';
+import type { Font } from '../pixel-font.js';
 
 export const font8: Font = {
   '0': [
