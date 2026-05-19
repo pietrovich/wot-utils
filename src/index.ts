@@ -13,6 +13,7 @@ import { renderCommand } from './commands/render.js';
 import { pickCommand } from './commands/pick.js';
 import { inspectAtlasCommand } from './commands/inspect-atlas.js';
 import { extractAtlasCommand } from './commands/extract-atlas.js';
+import { packAtlasCommand } from './commands/pack-atlas.js';
 
 const app = new App();
 const program = new Command();
@@ -31,6 +32,7 @@ const atlas = new Command('atlas').description('Texture atlas tools');
 atlas.addCommand(inspectAtlasCommand());
 atlas.addCommand(pickCommand());
 atlas.addCommand(extractAtlasCommand());
+atlas.addCommand(packAtlasCommand());
 
 const font = new Command('font').description('Pixel font tools');
 font.addCommand(renderCommand());
