@@ -1,10 +1,10 @@
 {
-  "name": "wg-data-fetcher",
+  "name": "pie-wot-utils",
   "version": "0.1.0",
-  "description": "CLI tool to fetch World of Tanks data from the Wargaming API",
+  "description": "CLI utilities for World of Tanks data and assets",
   "type": "module",
   "bin": {
-    "wg-fetcher": "dist/index.js"
+    "pie-wot": "dist/index.js"
   },
   "scripts": {
     "start": "tsx src/index.ts",
