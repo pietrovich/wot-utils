@@ -5,18 +5,17 @@ export function printJson(data: unknown): void {
   console.log(JSON.stringify(data, null, 2));
 }
 
+const GREEN = '\x1b[32m';
+const RESET = '\x1b[0m';
+
 export function printVehiclesTable(vehicles: Vehicle[]): void {
   const table = new Table({
-    head: ['ID', 'Name', 'Nation', 'Tier', 'Type', 'Premium'],
-    colAligns: ['right', 'left', 'left', 'right', 'left', 'left'],
+    head: ['Short', 'Tag', 'Name', 'ID', ''],
+    colAligns: ['left', 'left', 'left', 'right', 'left'],
   });
 
-  const sorted = [...vehicles].sort((a, b) =>
-    a.tier !== b.tier ? a.tier - b.tier : a.name.localeCompare(b.name),
-  );
-
-  for (const v of sorted) {
-    table.push([v.tank_id, v.name, v.nation, v.tier, v.type, v.is_premium ? 'yes' : '-']);
+  for (const v of vehicles) {
+    table.push([v.short_name, v.tag, v.name, v.tank_id, `${GREEN}✓${RESET}`]);
   }
 
   console.log(table.toString());
