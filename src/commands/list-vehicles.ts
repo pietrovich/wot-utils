@@ -4,8 +4,7 @@ import { printJson, printVehiclesTable } from '../lib/format.js';
 import type { App } from '../app.js';
 
 export function listVehiclesCommand(app: App): Command {
-  return new Command('list-vehicles')
-    .aliases(['v', 'vl', 'list'])
+  return new Command('list')
     .description('List vehicles from the WoT encyclopedia')
     .option('--all', 'show all vehicles (default: first 3)')
     .option('--json', 'output as JSON')
