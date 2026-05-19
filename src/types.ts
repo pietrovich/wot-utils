@@ -1,5 +1,16 @@
 export type VehicleType = 'lightTank' | 'mediumTank' | 'heavyTank' | 'AT-SPG' | 'SPG';
-export type Nation = 'ussr' | 'germany' | 'usa' | 'france' | 'uk' | 'japan' | 'china' | 'czech' | 'sweden' | 'poland' | 'italy';
+export type Nation =
+  | 'ussr'
+  | 'germany'
+  | 'usa'
+  | 'france'
+  | 'uk'
+  | 'japan'
+  | 'china'
+  | 'czech'
+  | 'sweden'
+  | 'poland'
+  | 'italy';
 export type ModuleType = 'vehicleChassis' | 'vehicleTurret' | 'vehicleEngine' | 'vehicleRadio' | 'vehicleGun';
 
 export interface ModuleNode {

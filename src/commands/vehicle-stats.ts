@@ -59,7 +59,7 @@ function printTable(rows: TableRow[]): void {
     try {
       console.log(formatRow(row));
     } catch (e) {
-      console.log(`!!!! ${ row[0] } ${ e instanceof Error ? e.message : e }`);
+      console.log(`!!!! ${row[0]} ${e instanceof Error ? e.message : e}`);
     }
   }
 }

@@ -2,9 +2,9 @@ export type Font = Record<string, string[]>;
 
 const ALPHA: Record<string, number> = {
   ' ': 0x00,
-  '-': 0x40,  // 25%
-  '+': 0xBF,  // 75%
-  'X': 0xFF,
+  '-': 0x40, // 25%
+  '+': 0xbf, // 75%
+  X: 0xff,
 };
 
 export class PixelFont {

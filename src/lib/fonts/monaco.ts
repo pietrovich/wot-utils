@@ -1,9 +1,10 @@
 import type { Font } from '../pixel-font.js';
 
 // Extracted from Monaco screenshot, cell width varies (1-5), height 9
-export const fontMonacoScreen: Font = {
-  'A': [
-    ' XXX ',
+export const monaco: Font = {
+  A: [
+    ' XXX ', //
+
     'X   X',
     'X   X',
     'XXXXX',
@@ -13,8 +14,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'B': [
-    'XXXX ',
+  B: [
+    'XXXX ', //
+
     'X   X',
     'X   X',
     'XXXX ',
@@ -24,19 +26,21 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'C': [
+  C: [
+    ' XXX ', //
+
+    'X   X',
+    'X    ',
+    'X    ',
+    'X    ',
+    'X   X',
     ' XXX ',
-    'X   X',
-    'X    ',
-    'X    ',
-    'X    ',
-    'X   X',
-    ' XXX ',
     '     ',
     '     ',
   ],
-  'D': [
-    'XXXX ',
+  D: [
+    'XXXX ', //
+
     'X   X',
     'X   X',
     'X   X',
@@ -46,8 +50,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'E': [
-    'XXXXX',
+  E: [
+    'XXXXX', //
+
     'X    ',
     'X    ',
     'XXXX ',
@@ -57,8 +62,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'F': [
-    'XXXXX',
+  F: [
+    'XXXXX', //
+
     'X    ',
     'X    ',
     'XXXX ',
@@ -68,8 +74,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'G': [
-    ' XXX ',
+  G: [
+    ' XXX ', //
+
     'X   X',
     'X    ',
     'X  XX',
@@ -79,8 +86,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'H': [
-    'X   X',
+  H: [
+    'X   X', //
+
     'X   X',
     'X   X',
     'XXXXX',
@@ -90,8 +98,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'I': [
-    'X',
+  I: [
+    'X', //
+
     'X',
     'X',
     'X',
@@ -101,8 +110,9 @@ export const fontMonacoScreen: Font = {
     ' ',
     ' ',
   ],
-  'J': [
-    '    X',
+  J: [
+    '    X', //
+
     '    X',
     '    X',
     '    X',
@@ -112,8 +122,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'K': [
-    'X   X',
+  K: [
+    'X   X', //
+
     'X  X ',
     'X X  ',
     'XX   ',
@@ -123,8 +134,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'L': [
-    'X    ',
+  L: [
+    'X    ', //
+
     'X    ',
     'X    ',
     'X    ',
@@ -134,8 +146,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'M': [
-    'X   X',
+  M: [
+    'X   X', //
+
     'XX XX',
     'X X X',
     'X   X',
@@ -145,8 +158,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'N': [
-    'X   X',
+  N: [
+    'X   X', //
+
     'XX  X',
     'X X X',
     'X  XX',
@@ -156,8 +170,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'O': [
-    ' XXX ',
+  O: [
+    ' XXX ', //
+
     'X   X',
     'X   X',
     'X   X',
@@ -167,8 +182,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'P': [
-    'XXXX ',
+  P: [
+    'XXXX ', //
+
     'X   X',
     'X   X',
     'XXXX ',
@@ -178,8 +194,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'Q': [
-    ' XXX ',
+  Q: [
+    ' XXX ', //
+
     'X   X',
     'X   X',
     'X   X',
@@ -189,8 +206,9 @@ export const fontMonacoScreen: Font = {
     '    X',
     '     ',
   ],
-  'R': [
-    'XXXX ',
+  R: [
+    'XXXX ', //
+
     'X   X',
     'X   X',
     'XXXX ',
@@ -200,8 +218,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'S': [
-    ' XXX ',
+  S: [
+    ' XXX ', //
+
     'X   X',
     'X    ',
     ' XXX ',
@@ -211,8 +230,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'T': [
-    'XXXXX',
+  T: [
+    'XXXXX', //
+
     '  X  ',
     '  X  ',
     '  X  ',
@@ -222,8 +242,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'U': [
-    'X   X',
+  U: [
+    'X   X', //
+
     'X   X',
     'X   X',
     'X   X',
@@ -233,8 +254,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'V': [
-    'X   X',
+  V: [
+    'X   X', //
+
     'X   X',
     'X   X',
     ' X X ',
@@ -244,8 +266,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'W': [
-    'X   X',
+  W: [
+    'X   X', //
+
     'X   X',
     'X   X',
     'X   X',
@@ -255,8 +278,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'X': [
-    'X   X',
+  X: [
+    'X   X', //
+
     ' X X ',
     '  X  ',
     '  X  ',
@@ -266,8 +290,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'Y': [
-    'X   X',
+  Y: [
+    'X   X', //
+
     'X   X',
     'X   X',
     ' X X ',
@@ -277,8 +302,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'Z': [
-    'XXXXX',
+  Z: [
+    'XXXXX', //
+
     '    X',
     '   X ',
     '  X  ',
@@ -288,8 +314,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'a': [
-    '     ',
+  a: [
+    '     ', //
+
     '     ',
     ' XXXX',
     'X   X',
@@ -299,8 +326,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'b': [
-    'X    ',
+  b: [
+    'X    ', //
+
     'X    ',
     'XXXX ',
     'X   X',
@@ -310,8 +338,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'c': [
-    '     ',
+  c: [
+    '     ', //
+
     '     ',
     ' XXX ',
     'X   X',
@@ -321,8 +350,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'd': [
-    '    X',
+  d: [
+    '    X', //
+
     '    X',
     ' XXXX',
     'X   X',
@@ -332,8 +362,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'e': [
-    '     ',
+  e: [
+    '     ', //
+
     '     ',
     ' XXX ',
     'X   X',
@@ -343,8 +374,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'f': [
-    '  XX',
+  f: [
+    '  XX', //
+
     ' X  ',
     'XXX ',
     ' X  ',
@@ -354,8 +386,9 @@ export const fontMonacoScreen: Font = {
     '    ',
     '    ',
   ],
-  'g': [
-    '     ',
+  g: [
+    '     ', //
+
     '     ',
     ' XXXX',
     'X   X',
@@ -365,8 +398,9 @@ export const fontMonacoScreen: Font = {
     '    X',
     ' XXX ',
   ],
-  'h': [
-    'X    ',
+  h: [
+    'X    ', //
+
     'X    ',
     'XXXX ',
     'X   X',
@@ -376,8 +410,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'i': [
-    'X',
+  i: [
+    'X', //
+
     ' ',
     'X',
     'X',
@@ -387,8 +422,9 @@ export const fontMonacoScreen: Font = {
     ' ',
     ' ',
   ],
-  'j': [
-    'X',
+  j: [
+    'X', //
+
     ' ',
     'X',
     'X',
@@ -398,8 +434,9 @@ export const fontMonacoScreen: Font = {
     'X',
     ' ',
   ],
-  'k': [
-    'X    ',
+  k: [
+    'X    ', //
+
     'X    ',
     'X  X ',
     'X X  ',
@@ -409,8 +446,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'l': [
-    'X ',
+  l: [
+    'X ', //
+
     'X ',
     'X ',
     'X ',
@@ -420,8 +458,9 @@ export const fontMonacoScreen: Font = {
     '  ',
     '  ',
   ],
-  'm': [
-    '     ',
+  m: [
+    '     ', //
+
     '     ',
     'XXXX ',
     'X X X',
@@ -431,8 +470,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'n': [
-    '     ',
+  n: [
+    '     ', //
+
     '     ',
     'X XX ',
     'XX  X',
@@ -442,8 +482,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'o': [
-    '     ',
+  o: [
+    '     ', //
+
     '     ',
     ' XXX ',
     'X   X',
@@ -453,8 +494,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'p': [
-    '     ',
+  p: [
+    '     ', //
+
     '     ',
     'XXXX ',
     'X   X',
@@ -464,8 +506,9 @@ export const fontMonacoScreen: Font = {
     'X    ',
     'X    ',
   ],
-  'q': [
-    '     ',
+  q: [
+    '     ', //
+
     '     ',
     ' XXXX',
     'X   X',
@@ -475,8 +518,9 @@ export const fontMonacoScreen: Font = {
     '    X',
     '    X',
   ],
-  'r': [
-    '     ',
+  r: [
+    '     ', //
+
     '     ',
     'X XX ',
     'XX  X',
@@ -486,8 +530,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  's': [
-    '     ',
+  s: [
+    '     ', //
+
     '     ',
     ' XXXX',
     'X    ',
@@ -497,8 +542,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  't': [
-    ' X  ',
+  t: [
+    ' X  ', //
+
     ' X  ',
     'XXXX',
     ' X  ',
@@ -508,8 +554,9 @@ export const fontMonacoScreen: Font = {
     '    ',
     '    ',
   ],
-  'u': [
-    '     ',
+  u: [
+    '     ', //
+
     '     ',
     'X   X',
     'X   X',
@@ -519,8 +566,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'v': [
-    '     ',
+  v: [
+    '     ', //
+
     '     ',
     'X   X',
     'X   X',
@@ -530,8 +578,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'w': [
-    '     ',
+  w: [
+    '     ', //
+
     '     ',
     'X X X',
     'X X X',
@@ -541,8 +590,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'x': [
-    '     ',
+  x: [
+    '     ', //
+
     '     ',
     'X   X',
     ' X X ',
@@ -552,8 +602,9 @@ export const fontMonacoScreen: Font = {
     '     ',
     '     ',
   ],
-  'y': [
-    '     ',
+  y: [
+    '     ', //
+
     '     ',
     'X   X',
     'X   X',
@@ -563,8 +614,9 @@ export const fontMonacoScreen: Font = {
     '    X',
     ' XXX ',
   ],
-  'z': [
-    '     ',
+  z: [
+    '     ', //
+
     '     ',
     'XXXXX',
     '   X ',
@@ -575,7 +627,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '0': [
-    ' XXX ',
+    ' XXX ', //
+
     'X   X',
     'X  XX',
     'X X X',
@@ -586,7 +639,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '1': [
-    ' X',
+    ' X', //
+
     'XX',
     ' X',
     ' X',
@@ -597,7 +651,8 @@ export const fontMonacoScreen: Font = {
     '  ',
   ],
   '2': [
-    ' XXX ',
+    ' XXX ', //
+
     'X   X',
     '    X',
     '   X ',
@@ -608,7 +663,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '3': [
-    ' XXX ',
+    ' XXX ', //
+
     'X   X',
     '    X',
     '  XX ',
@@ -619,7 +675,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '4': [
-    '   X ',
+    '   X ', //
+
     '  XX ',
     ' X X ',
     'X  X ',
@@ -630,7 +687,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '5': [
-    'XXXXX',
+    'XXXXX', //
+
     'X    ',
     'XXXX ',
     '    X',
@@ -641,7 +699,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '6': [
-    ' XXX ',
+    ' XXX ', //
+
     'X    ',
     'XXXX ',
     'X   X',
@@ -652,7 +711,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '7': [
-    'XXXXX',
+    'XXXXX', //
+
     '    X',
     '    X',
     '   X ',
@@ -663,7 +723,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '8': [
-    ' XXX ',
+    ' XXX ', //
+
     'X   X',
     'X   X',
     ' XXX ',
@@ -674,7 +735,8 @@ export const fontMonacoScreen: Font = {
     '     ',
   ],
   '9': [
-    ' XXX ',
+    ' XXX ', //
+
     'X   X',
     'X   X',
     'X   X',
