@@ -1,6 +1,6 @@
-import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Command } from 'commander';
+import sharp from 'sharp';
 import { BackgroundFactory } from '~/lib/icons/background-factory.js';
 
 export function dumpBackgroundCommand(): Command {
@@ -9,9 +9,9 @@ export function dumpBackgroundCommand(): Command {
     .action(async () => {
       const factory = new BackgroundFactory();
       for (const type of BackgroundFactory.types()) {
-        const buf = await factory.generate(type);
+        const { data, info } = await factory.generate(type);
         const outPath = join(process.cwd(), `${type.toLowerCase()}.png`);
-        await writeFile(outPath, buf);
+        await sharp(data, { raw: info }).png().toFile(outPath);
         console.log(`Written ${outPath}`);
       }
     });

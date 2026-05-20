@@ -125,6 +125,7 @@ function buildGradientBuffer(rows: [number, number, number][]): { input: Buffer;
 
 export class BackgroundFactory {
   private cachedOverlayBar: CompositeInput | null = null;
+  private cache = new Map<string, { data: Buffer; info: sharp.OutputInfo }>();
 
   private getOverlayBar(): CompositeInput {
     if (!this.cachedOverlayBar) {
@@ -134,18 +135,26 @@ export class BackgroundFactory {
     return this.cachedOverlayBar;
   }
 
-  async generate(type: string): Promise<Buffer> {
+  async generate(type: string): Promise<{ data: Buffer; info: sharp.OutputInfo }> {
+    const hit = this.cache.get(type);
+    if (hit) {
+      return hit;
+    }
+
     const rows = bgColors[type];
     if (!rows) {
       throw new Error(`Unknown tank type: "${type}"`);
     }
 
     const gradient = buildGradientBuffer(rows);
-
-    return sharp(gradient.input, { raw: gradient.raw })
+    const result = await sharp(gradient.input, { raw: gradient.raw })
       .composite([this.getOverlayBar(), { input: SHIELD_PATH, top: 0, left: 0 }])
-      .png()
-      .toBuffer();
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    this.cache.set(type, result);
+
+    return result;
   }
 
   static types(): string[] {
