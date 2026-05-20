@@ -69,7 +69,7 @@ function extractProfile(data: unknown): VehicleProfile {
 }
 
 export function vehicleStatsCommand(app: App): Command {
-  return new Command('vehicle-stats')
+  return new Command('stats')
     .description('Fetch stats for the best module configuration of a vehicle')
     .argument('[query]', 'tank_id (number), tag, or short_name')
     .option('--all', 'fetch stats for all vehicles and print as a table')

@@ -11,20 +11,34 @@ import { vehicleStatsCommand } from './commands/vehicle-stats.js';
 import { charsCommand } from './commands/chars.js';
 import { renderCommand } from './commands/render.js';
 import { pickCommand } from './commands/pick.js';
+import { inspectAtlasCommand } from './commands/inspect-atlas.js';
 
 const app = new App();
 const program = new Command();
 
 program.name('wg-fetcher').description('Fetch World of Tanks data from the Wargaming API').version('0.1.0');
 
-program.addCommand(listVehiclesCommand(app));
-program.addCommand(exportCommand(app));
-program.addCommand(fetchIconsCommand(app));
-program.addCommand(cachePurgeCommand(app));
-program.addCommand(bestConfigCommand(app));
-program.addCommand(vehicleStatsCommand(app));
-program.addCommand(charsCommand(app));
-program.addCommand(renderCommand());
-program.addCommand(pickCommand());
+const vehicle = new Command('vehicle').description('WoT vehicle data');
+vehicle.addCommand(listVehiclesCommand(app));
+vehicle.addCommand(exportCommand(app));
+vehicle.addCommand(fetchIconsCommand(app));
+vehicle.addCommand(vehicleStatsCommand(app));
+vehicle.addCommand(bestConfigCommand(app));
+vehicle.addCommand(charsCommand(app));
+
+const atlas = new Command('atlas').description('Texture atlas tools');
+atlas.addCommand(inspectAtlasCommand());
+atlas.addCommand(pickCommand());
+
+const font = new Command('font').description('Pixel font tools');
+font.addCommand(renderCommand());
+
+const cache = new Command('cache').description('API response cache');
+cache.addCommand(cachePurgeCommand(app));
+
+program.addCommand(vehicle);
+program.addCommand(atlas);
+program.addCommand(font);
+program.addCommand(cache);
 
 await program.parseAsync();
