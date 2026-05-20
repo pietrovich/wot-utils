@@ -1,9 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchVehicles, WGApiError } from '../src/lib/api.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { WGApiError } from '../src/lib/api.js';
+import { App } from '../src/app.js';
 
-describe('fetchVehicles', () => {
+describe('App vehicle fetching', () => {
   beforeEach(() => {
+    vi.stubEnv('WG_APP_ID', 'test-app-id');
     vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('returns vehicle data on success', async () => {
@@ -13,7 +19,7 @@ describe('fetchVehicles', () => {
       vi.fn().mockResolvedValue({ json: () => Promise.resolve({ status: 'ok', data: mockData }) }),
     );
 
-    const result = await fetchVehicles('test-app-id');
+    const result = await new App().getVehicles({ useCache: false });
     expect(result).toEqual(mockData);
   });
 
@@ -24,18 +30,13 @@ describe('fetchVehicles', () => {
         json: () =>
           Promise.resolve({
             status: 'error',
-            error: {
-              field: 'application_id',
-              code: 407,
-              message: 'INVALID_APPLICATION_ID',
-              value: null,
-            },
+            error: { field: 'application_id', code: 407, message: 'INVALID_APPLICATION_ID', value: null },
           }),
       }),
     );
 
-    await expect(fetchVehicles('bad-id')).rejects.toThrow(WGApiError);
-    await expect(fetchVehicles('bad-id')).rejects.toThrow('INVALID_APPLICATION_ID');
+    await expect(new App().getVehicles({ useCache: false })).rejects.toThrow(WGApiError);
+    await expect(new App().getVehicles({ useCache: false })).rejects.toThrow('INVALID_APPLICATION_ID');
   });
 
   it('includes application_id in the request URL', async () => {
@@ -44,9 +45,9 @@ describe('fetchVehicles', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    await fetchVehicles('my-app-id');
+    await new App().getVehicles({ useCache: false });
 
     const calledUrl: string = mockFetch.mock.calls[0][0];
-    expect(calledUrl).toContain('application_id=my-app-id');
+    expect(calledUrl).toContain('application_id=test-app-id');
   });
 });

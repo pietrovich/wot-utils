@@ -1,7 +1,7 @@
-export function getAppId(override?: string): string {
-  const appId = override ?? process.env.WG_APP_ID;
+export function getAppId(): string {
+  const appId = process.env.WG_APP_ID;
   if (!appId) {
-    console.error('Error: No application ID. Set WG_APP_ID in .env or pass --app-id.');
+    console.error('Error: No application ID. Set WG_APP_ID in .env.');
     process.exit(1);
   }
 

@@ -2,14 +2,17 @@ import { Command } from 'commander';
 import { WGApiError } from '../lib/api.js';
 import type { App } from '../app.js';
 
-export function exportCommand(app: App): Command {
-  return new Command('export')
-    .description('Export all vehicles to a JSON file')
-    .option('--output <path>', 'output file path (default: wg-export-<timestamp>.json)')
-    .option('--no-cache', 'bypass cache and fetch fresh data')
+export function fetchIconsCommand(app: App): Command {
+  return new Command('fetch-icons')
+    .description('Download contour icons for all vehicles into .data/contour-icons/')
+    .option('--force', 're-download icons that already exist locally')
+    .option('--concurrency <n>', 'parallel downloads', '10')
     .action(async (options) => {
       try {
-        await app.exportVehicles({ output: options.output, useCache: options.cache });
+        await app.fetchIcons({
+          force: options.force,
+          concurrency: Math.max(1, parseInt(options.concurrency, 10) || 10),
+        });
       } catch (error) {
         if (error instanceof WGApiError) {
           console.error(`API error [${error.code}] ${error.field}: ${error.message}`);
