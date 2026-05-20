@@ -1,7 +1,203 @@
 // noinspection ES6ConvertVarToLetConst,LanguageDetectionInspection,DuplicatedCode,OverlyComplexFunctionJS,SpellCheckingInspection,EqualityComparisonWithCoercionJS,JSDuplicatedDeclaration,PointlessArithmeticExpressionJS,FunctionTooLongJS
 /** eslint-disable */
+import * as C from './dd-constants.js';
 
-export class Utex {
+export class DDSUtils {
+  _int8 = new Uint8Array(4);
+  _int = new Uint32Array(this._int8.buffer);
+  _arr16 = new Uint8Array(16);
+
+  // ── public API ──────────────────────────────────────────────────────────────
+
+  decode(buff) {
+    var data = new Uint8Array(buff),
+      offset = 4;
+
+    var head = this.readHeader(data, offset);
+    offset += 124;
+    var pf = head.pixFormat;
+    if (pf.flags & C.DDPF_FOURCC && pf.fourCC == 'DX10') {
+      offset += 20;
+    }
+
+    var w = head.width,
+      h = head.height,
+      out = [];
+    var fmt = pf.fourCC;
+
+    var mcnt = Math.max(1, head.mmcount);
+    for (var it = 0; it < mcnt; it++) {
+      var img = new Uint8Array(w * h * 4);
+      if (false) {
+      } else if (fmt == 'DXT1') {
+        offset = this.readBC1(data, offset, img, w, h);
+      } else if (fmt == 'DXT3') {
+        offset = this.readBC2(data, offset, img, w, h);
+      } else if (fmt == 'DXT5') {
+        offset = this.readBC3(data, offset, img, w, h);
+      } else if (fmt == 'DX10') {
+        throw new Error('Not supported: BC7 (DX10)');
+      } else if (fmt == 'ATC ') {
+        throw new Error('Not supported: ATC');
+      } else if (fmt == 'ATCA') {
+        throw new Error('Not supported: ATCA');
+      } else if (fmt == 'ATCI') {
+        throw new Error('Not supported: ATCI');
+      } else if (pf.flags & C.DDPF_ALPHAPIXELS && pf.flags & C.DDPF_RGB) {
+        throw new Error('Not supported: (complex-A)');
+      } else if (pf.flags & C.DDPF_ALPHA || pf.flags & C.DDPF_ALPHAPIXELS || pf.flags & C.DDPF_LUMINANCE) {
+        throw new Error('Not supported: (complex-B)');
+      } else {
+        console.log(
+          'unknown texture format, head flags: ',
+          head.flags.toString(2),
+          'pixelFormat flags: ',
+          pf.flags.toString(2),
+        );
+        throw 'e';
+      }
+
+      out.push({ width: w, height: h, image: img.buffer });
+      w = w >> 1;
+      h = h >> 1;
+    }
+
+    return out;
+  }
+
+  encode(img, w, h, forceAlpha = true) {
+    var imageAsByteArray = new Uint8Array(img);
+    var aAnd = 255;
+    for (var i = 3; i < imageAsByteArray.length; i += 4) {
+      aAnd &= imageAsByteArray[i];
+    }
+
+    var gotAlpha = forceAlpha || aAnd < 250;
+
+    var data = new Uint8Array(124 + w * h * 2),
+      offset = 0;
+    this.writeASCII(data, offset, 'DDS ');
+    offset += 4;
+    this.writeHeader(data, w, h, gotAlpha, offset);
+    offset += 124;
+
+    var mcnt = 0;
+    while (w * h != 0) {
+      if (gotAlpha) {
+        offset = this.writeBC3(imageAsByteArray, w, h, data, offset);
+      } else {
+        offset = this.writeBC1(imageAsByteArray, w, h, data, offset);
+      }
+
+      imageAsByteArray = this.mipmapB(imageAsByteArray, w, h);
+      w = w >> 1;
+      h = h >> 1;
+      mcnt++;
+    }
+
+    data[28] = mcnt;
+
+    return data.buffer.slice(0, offset);
+  }
+
+  // ── DDS header I/O ──────────────────────────────────────────────────────────
+
+  readHeader(data, offset) {
+    var hd = {};
+    offset += 4; // size = 124
+    hd.flags = this.readUintLE(data, offset);
+    offset += 4;
+    hd.height = this.readUintLE(data, offset);
+    offset += 4;
+    hd.width = this.readUintLE(data, offset);
+    offset += 4;
+    hd.pitch = this.readUintLE(data, offset);
+    offset += 4;
+    hd.depth = this.readUintLE(data, offset);
+    offset += 4;
+    hd.mmcount = this.readUintLE(data, offset);
+    offset += 4;
+    offset += 11 * 4; // reserved, zeros
+    hd.pixFormat = this.readPixFormat(data, offset);
+    offset += 32;
+    hd.caps = this.readUintLE(data, offset);
+    offset += 4;
+    hd.caps2 = this.readUintLE(data, offset);
+    offset += 4;
+    hd.caps3 = this.readUintLE(data, offset);
+    offset += 4;
+    hd.caps4 = this.readUintLE(data, offset);
+    offset += 4;
+    offset += 4; // reserved, zeros
+
+    return hd;
+  }
+
+  writeHeader(data, w, h, gotAlpha, offset) {
+    var flgs = C.DDSD_CAPS | C.DDSD_HEIGHT | C.DDSD_WIDTH | C.DDSD_PIXELFORMAT;
+    flgs |= C.DDSD_MIPMAPCOUNT | C.DDSD_LINEARSIZE;
+
+    var caps = C.DDSCAPS_COMPLEX | C.DDSCAPS_MIPMAP | C.DDSCAPS_TEXTURE;
+    var pitch = ((w * h) >> 1) * (gotAlpha ? 2 : 1),
+      depth = gotAlpha ? 1 : 0;
+
+    this.writeUintLE(data, offset, 124);
+    offset += 4;
+    this.writeUintLE(data, offset, flgs);
+    offset += 4;
+    this.writeUintLE(data, offset, h);
+    offset += 4;
+    this.writeUintLE(data, offset, w);
+    offset += 4;
+    this.writeUintLE(data, offset, pitch);
+    offset += 4;
+    this.writeUintLE(data, offset, depth);
+    offset += 4;
+    this.writeUintLE(data, offset, 10);
+    offset += 4;
+    offset += 11 * 4;
+    this.writePixFormat(data, gotAlpha, offset);
+    offset += 32;
+    this.writeUintLE(data, offset, caps);
+    offset += 4;
+    offset += 4 * 4;
+  }
+
+  readPixFormat(data, offset) {
+    var pf = {};
+    offset += 4; // size = 32
+    pf.flags = this.readUintLE(data, offset);
+    offset += 4;
+    pf.fourCC = this.readASCII(data, offset, 4);
+    offset += 4;
+    pf.bitCount = this.readUintLE(data, offset);
+    offset += 4;
+    pf.RMask = this.readUintLE(data, offset);
+    offset += 4;
+    pf.GMask = this.readUintLE(data, offset);
+    offset += 4;
+    pf.BMask = this.readUintLE(data, offset);
+    offset += 4;
+    pf.AMask = this.readUintLE(data, offset);
+    offset += 4;
+
+    return pf;
+  }
+
+  writePixFormat(data, gotAlpha, offset) {
+    var flgs = C.DDPF_FOURCC;
+
+    this.writeUintLE(data, offset, 32);
+    offset += 4;
+    this.writeUintLE(data, offset, flgs);
+    offset += 4;
+    this.writeASCII(data, offset, gotAlpha ? 'DXT5' : 'DXT1');
+    offset += 4;
+    offset += 5 * 4;
+  }
+
+  // ── BC codec ────────────────────────────────────────────────────────────────
+
   readBC1(data, offset, img, w, h) {
     var sqr = new Uint8Array(4 * 4 * 4);
 
@@ -99,6 +295,7 @@ export class Utex {
 
     return offset;
   }
+
   writeBC3(img, w, h, data, offset) {
     var sqr = new Uint8Array(16 * 4);
     for (var y = 0; y < h; y += 4) {
@@ -154,7 +351,6 @@ export class Utex {
     return offset;
   }
 
-  _arr16 = new Uint8Array(16);
   readBCcolor(data, offset, sqr) {
     var c0 = (data[offset + 1] << 8) | data[offset];
     var c1 = (data[offset + 3] << 8) | data[offset + 2];
@@ -203,6 +399,7 @@ export class Utex {
 
     this.toSquare(data, sqr, clr, offset);
   }
+
   writeBCcolor(data, offset, sqr) {
     var dist = this.colorDist;
     var ends = this.mostDistant(sqr);
@@ -285,7 +482,6 @@ export class Utex {
   }
 
   read4x4(a, w, h, sx, sy, b) {
-    // read from large
     for (var y = 0; y < 4; y++) {
       var si = ((sy + y) * w + sx) << 2,
         ti = y << 4;
@@ -307,8 +503,8 @@ export class Utex {
       b[ti + 15] = a[si + 15];
     }
   }
+
   write4x4(a, w, h, sx, sy, b) {
-    // write to large
     for (var y = 0; y < 4; y++) {
       var si = ((sy + y) * w + sx) << 2,
         ti = y << 4;
@@ -393,8 +589,6 @@ export class Utex {
       for (var x = 0; x < nw; x++) {
         var ti = (y * nw + x) << 2,
           si = ((y << 1) * w + (x << 1)) << 2;
-        //nbuf[ti  ] = buff[si  ];  nbuf[ti+1] = buff[si+1];  nbuf[ti+2] = buff[si+2];  nbuf[ti+3] = buff[si+3];
-        //*
         var a0 = buff[si + 3],
           a1 = buff[si + 7];
         var r = buff[si] * a0 + buff[si + 4] * a1;
@@ -443,5 +637,39 @@ export class Utex {
     }
 
     return ends;
+  }
+
+  // ── I/O helpers ─────────────────────────────────────────────────────────────
+
+  readUintLE(buff, p) {
+    this._int8[0] = buff[p + 0];
+    this._int8[1] = buff[p + 1];
+    this._int8[2] = buff[p + 2];
+    this._int8[3] = buff[p + 3];
+
+    return this._int[0];
+  }
+
+  writeUintLE(buff, p, n) {
+    this._int[0] = n;
+    buff[p + 0] = this._int8[0];
+    buff[p + 1] = this._int8[1];
+    buff[p + 2] = this._int8[2];
+    buff[p + 3] = this._int8[3];
+  }
+
+  readASCII(buff, p, l) {
+    let s = '';
+    for (let i = 0; i < l; i++) {
+      s += String.fromCharCode(buff[p + i]);
+    }
+
+    return s;
+  }
+
+  writeASCII(buff, p, s) {
+    for (let i = 0; i < s.length; i++) {
+      buff[p + i] = s.charCodeAt(i);
+    }
   }
 }

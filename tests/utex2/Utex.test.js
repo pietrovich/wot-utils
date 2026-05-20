@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Utex } from '../../src/lib/utex2/Utex.js';
+import { DDSUtils } from '../../src/lib/utex2/DDSUtils.js';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ const BC1_BLACK = new Uint8Array([0xFF, 0xFF, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55
 
 describe('Utex', () => {
   let utex;
-  beforeEach(() => { utex = new Utex(); });
+  beforeEach(() => { utex = new DDSUtils(); });
 
   // ── inter8 ────────────────────────────────────────────────────────────────
 

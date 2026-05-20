@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { UtexUtils } from '../../src/lib/utex2/UtexUtils.js';
+import { DDSUtils } from '../../src/lib/utex2/DDSUtils.js';
 
 describe('UtexUtils', () => {
   let utils;
 
   beforeEach(() => {
-    utils = new UtexUtils();
+    utils = new DDSUtils();
   });
 
   describe('readUintLE', () => {

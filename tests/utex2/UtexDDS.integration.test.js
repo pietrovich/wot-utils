@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
-import { UtexDDS } from '../../src/lib/utex2/UtexDDS.js';
+import { DDSUtils } from '../../src/lib/utex2/DDSUtils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SAMPLE_DDS = resolve(__dirname, 'sample.dds');
@@ -15,7 +15,7 @@ const SAMPLE_DDS = resolve(__dirname, 'sample.dds');
 describe('UtexDDS integration', () => {
   it('decodes sample.dds to an RGBA buffer with correct dimensions', () => {
     const file = readFileSync(SAMPLE_DDS);
-    const dds = new UtexDDS();
+    const dds = new DDSUtils();
     const frames = dds.decode(file);
 
     expect(frames).toHaveLength(1);
@@ -27,7 +27,7 @@ describe('UtexDDS integration', () => {
 
   it('round-trips through encode → decode with identical pixel output', () => {
     const file = readFileSync(SAMPLE_DDS);
-    const dds = new UtexDDS();
+    const dds = new DDSUtils();
 
     // Step 1: decode original DDS → RGBA
     const [{ width, height, image: originalRgba }] = dds.decode(file);
