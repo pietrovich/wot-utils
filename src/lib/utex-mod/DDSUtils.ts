@@ -1,5 +1,33 @@
 // noinspection ES6ConvertVarToLetConst,LanguageDetectionInspection,DuplicatedCode,OverlyComplexFunctionJS,SpellCheckingInspection,EqualityComparisonWithCoercionJS,JSDuplicatedDeclaration,PointlessArithmeticExpressionJS,FunctionTooLongJS
-/** eslint-disable */
+/* eslint-disable */
+
+export type DDSFrame = { width: number; height: number; image: ArrayBuffer };
+
+type DDSPixelFormat = {
+  flags: number;
+  fourCC: string;
+  bitCount: number;
+  RMask: number;
+  GMask: number;
+  BMask: number;
+  AMask: number;
+};
+
+type DDSHeader = {
+  flags: number;
+  height: number;
+  width: number;
+  pitch: number;
+  depth: number;
+  mmcount: number;
+  pixFormat: DDSPixelFormat;
+  caps: number;
+  caps2: number;
+  caps3: number;
+  caps4: number;
+};
+
+type BitPos = { boff: number };
 
 export class DDSUtils {
   // ── DDS header flags ────────────────────────────────────────────────────────
@@ -24,17 +52,18 @@ export class DDSUtils {
   static DDSCAPS_COMPLEX  = 0x8;
   static DDSCAPS_MIPMAP   = 0x400000;
   static DDSCAPS_TEXTURE  = 0x1000;
+
   // Reusable scratch buffers — allocated once per instance to avoid per-call
   // heap pressure in tight decode/encode loops. WARNING: contents are not
   // cleared between calls; never hold a reference to these across method
   // invocations or assume they are zero-initialised on entry.
-  _int8 = new Uint8Array(4);
-  _int = new Uint32Array(this._int8.buffer); // shares memory with _int8 for LE uint32 reinterpretation
+  _int8  = new Uint8Array(4);
+  _int   = new Uint32Array(this._int8.buffer); // shares memory with _int8 for LE uint32 reinterpretation
   _arr16 = new Uint8Array(16); // 4-color palette slot for readBCcolor (16 RGBA entries × 1 byte)
 
   // ── public API ──────────────────────────────────────────────────────────────
 
-  decode(buff) {
+  decode(buff: ArrayBuffer | Uint8Array): DDSFrame[] {
     var data = new Uint8Array(buff),
       offset = 4;
 
@@ -47,14 +76,13 @@ export class DDSUtils {
 
     var w = head.width,
       h = head.height,
-      out = [];
+      out: DDSFrame[] = [];
     var fmt = pf.fourCC;
 
     var mcnt = Math.max(1, head.mmcount);
     for (var it = 0; it < mcnt; it++) {
       var img = new Uint8Array(w * h * 4);
-      if (false) {
-      } else if (fmt == 'DXT1') {
+      if (fmt == 'DXT1') {
         offset = this.readBC1(data, offset, img, w, h);
       } else if (fmt == 'DXT3') {
         offset = this.readBC2(data, offset, img, w, h);
@@ -73,13 +101,7 @@ export class DDSUtils {
       } else if (pf.flags & DDSUtils.DDPF_ALPHA || pf.flags & DDSUtils.DDPF_ALPHAPIXELS || pf.flags & DDSUtils.DDPF_LUMINANCE) {
         throw new Error('Not supported: (complex-B)');
       } else {
-        console.log(
-          'unknown texture format, head flags: ',
-          head.flags.toString(2),
-          'pixelFormat flags: ',
-          pf.flags.toString(2),
-        );
-        throw 'e';
+        throw new Error(`Unknown texture format — head flags: ${head.flags.toString(2)}, pixelFormat flags: ${pf.flags.toString(2)}`);
       }
 
       out.push({ width: w, height: h, image: img.buffer });
@@ -90,7 +112,7 @@ export class DDSUtils {
     return out;
   }
 
-  encode(img, w, h, forceAlpha = true) {
+  encode(img: ArrayBuffer | Uint8Array, w: number, h: number, forceAlpha = true): ArrayBuffer {
     var imageAsByteArray = new Uint8Array(img);
     var aAnd = 255;
     for (var i = 3; i < imageAsByteArray.length; i += 4) {
@@ -127,8 +149,8 @@ export class DDSUtils {
 
   // ── DDS header I/O ──────────────────────────────────────────────────────────
 
-  readHeader(data, offset) {
-    var hd = {};
+  readHeader(data: Uint8Array, offset: number): DDSHeader {
+    var hd = {} as DDSHeader;
     offset += 4; // size = 124
     hd.flags = this.readUintLE(data, offset);
     offset += 4;
@@ -158,7 +180,7 @@ export class DDSUtils {
     return hd;
   }
 
-  writeHeader(data, w, h, gotAlpha, offset) {
+  writeHeader(data: Uint8Array, w: number, h: number, gotAlpha: boolean, offset: number): void {
     var flgs = DDSUtils.DDSD_CAPS | DDSUtils.DDSD_HEIGHT | DDSUtils.DDSD_WIDTH | DDSUtils.DDSD_PIXELFORMAT;
     flgs |= DDSUtils.DDSD_MIPMAPCOUNT | DDSUtils.DDSD_LINEARSIZE;
 
@@ -188,8 +210,8 @@ export class DDSUtils {
     offset += 4 * 4;
   }
 
-  readPixFormat(data, offset) {
-    var pf = {};
+  readPixFormat(data: Uint8Array, offset: number): DDSPixelFormat {
+    var pf = {} as DDSPixelFormat;
     offset += 4; // size = 32
     pf.flags = this.readUintLE(data, offset);
     offset += 4;
@@ -209,7 +231,7 @@ export class DDSUtils {
     return pf;
   }
 
-  writePixFormat(data, gotAlpha, offset) {
+  writePixFormat(data: Uint8Array, gotAlpha: boolean, offset: number): void {
     var flgs = DDSUtils.DDPF_FOURCC;
 
     this.writeUintLE(data, offset, 32);
@@ -223,7 +245,7 @@ export class DDSUtils {
 
   // ── BC codec ────────────────────────────────────────────────────────────────
 
-  readBC1(data, offset, img, w, h) {
+  readBC1(data: Uint8Array, offset: number, img: Uint8Array, w: number, h: number): number {
     var sqr = new Uint8Array(4 * 4 * 4);
 
     for (var y = 0; y < h; y += 4) {
@@ -237,7 +259,7 @@ export class DDSUtils {
     return offset;
   }
 
-  writeBC1(img, w, h, data, offset) {
+  writeBC1(img: Uint8Array, w: number, h: number, data: Uint8Array, offset: number): number {
     var sqr = new Uint8Array(16 * 4);
     for (var y = 0; y < h; y += 4) {
       for (var x = 0; x < w; x += 4) {
@@ -250,8 +272,8 @@ export class DDSUtils {
     return offset;
   }
 
-  readBC2(data, offset, img, w, h) {
-    var pos = { boff: offset * 8 };
+  readBC2(data: Uint8Array, offset: number, img: Uint8Array, w: number, h: number): number {
+    var pos: BitPos = { boff: offset * 8 };
     var sqr = new Uint8Array(4 * 4 * 4);
 
     for (var y = 0; y < h; y += 4) {
@@ -271,7 +293,7 @@ export class DDSUtils {
     return offset;
   }
 
-  inter8(a, b) {
+  inter8(a: number, b: number): number[] {
     var al = [a, b];
 
     if (a > b) {
@@ -297,8 +319,8 @@ export class DDSUtils {
     return al;
   }
 
-  readBC3(data, offset, img, w, h) {
-    var pos = { boff: offset * 8 };
+  readBC3(data: Uint8Array, offset: number, img: Uint8Array, w: number, h: number): number {
+    var pos: BitPos = { boff: offset * 8 };
     var sqr = new Uint8Array(4 * 4 * 4);
 
     for (var y = 0; y < h; y += 4) {
@@ -321,7 +343,7 @@ export class DDSUtils {
     return offset;
   }
 
-  writeBC3(img, w, h, data, offset) {
+  writeBC3(img: Uint8Array, w: number, h: number, data: Uint8Array, offset: number): number {
     var sqr = new Uint8Array(16 * 4);
     for (var y = 0; y < h; y += 4) {
       for (var x = 0; x < w; x += 4) {
@@ -376,7 +398,7 @@ export class DDSUtils {
     return offset;
   }
 
-  readBCcolor(data, offset, sqr) {
+  readBCcolor(data: Uint8Array, offset: number, sqr: Uint8Array): void {
     var c0 = (data[offset + 1] << 8) | data[offset];
     var c1 = (data[offset + 3] << 8) | data[offset + 2];
 
@@ -425,8 +447,7 @@ export class DDSUtils {
     this.toSquare(data, sqr, clr, offset);
   }
 
-  writeBCcolor(data, offset, sqr) {
-    var dist = this.colorDist;
+  writeBCcolor(data: Uint8Array, offset: number, sqr: Uint8Array): void {
     var ends = this.mostDistant(sqr);
 
     var c0r = sqr[ends >> 8],
@@ -473,10 +494,10 @@ export class DDSUtils {
         g = sqr[i + 1],
         b = sqr[i + 2];
 
-      var ds0 = dist(r, g, b, c0r, c0g, c0b);
-      var ds1 = dist(r, g, b, c1r, c1g, c1b);
-      var ds2 = dist(r, g, b, c2r, c2g, c2b);
-      var ds3 = dist(r, g, b, c3r, c3g, c3b);
+      var ds0 = this.colorDist(r, g, b, c0r, c0g, c0b);
+      var ds1 = this.colorDist(r, g, b, c1r, c1g, c1b);
+      var ds2 = this.colorDist(r, g, b, c2r, c2g, c2b);
+      var ds3 = this.colorDist(r, g, b, c3r, c3g, c3b);
       var dsm = Math.min(ds0, Math.min(ds1, Math.min(ds2, ds3)));
 
       var code = 0;
@@ -493,7 +514,7 @@ export class DDSUtils {
     }
   }
 
-  toSquare(data, sqr, clr, offset) {
+  toSquare(data: Uint8Array, sqr: Uint8Array, clr: Uint8Array, offset: number): void {
     var boff = (offset + 4) << 3;
     for (var i = 0; i < 64; i += 4) {
       var code = (data[boff >> 3] >> (boff & 7)) & 3;
@@ -506,7 +527,7 @@ export class DDSUtils {
     }
   }
 
-  read4x4(a, w, h, sx, sy, b) {
+  read4x4(a: Uint8Array, w: number, h: number, sx: number, sy: number, b: Uint8Array): void {
     for (var y = 0; y < 4; y++) {
       var si = ((sy + y) * w + sx) << 2,
         ti = y << 4;
@@ -529,7 +550,7 @@ export class DDSUtils {
     }
   }
 
-  write4x4(a, w, h, sx, sy, b) {
+  write4x4(a: Uint8Array, w: number, h: number, sx: number, sy: number, b: Uint8Array): void {
     for (var y = 0; y < 4; y++) {
       var si = ((sy + y) * w + sx) << 2,
         ti = y << 4;
@@ -552,7 +573,7 @@ export class DDSUtils {
     }
   }
 
-  rotate(sqr, rot) {
+  rotate(sqr: Uint8Array, rot: number): void {
     if (rot == 0) {
       return;
     }
@@ -564,21 +585,15 @@ export class DDSUtils {
       var a = sqr[i + 3];
 
       if (rot == 1) {
-        var t = a;
-        a = r;
-        r = t;
+        var t = a; a = r; r = t;
       }
 
       if (rot == 2) {
-        var t = a;
-        a = g;
-        g = t;
+        var t = a; a = g; g = t;
       }
 
       if (rot == 3) {
-        var t = a;
-        a = b;
-        b = t;
+        var t = a; a = b; b = t;
       }
 
       sqr[i] = r;
@@ -588,7 +603,7 @@ export class DDSUtils {
     }
   }
 
-  readBits(data, pos, k) {
+  readBits(data: Uint8Array, pos: BitPos, k: number): number {
     var out = 0,
       ok = k;
     while (k != 0) {
@@ -599,14 +614,14 @@ export class DDSUtils {
     return out;
   }
 
-  readBit(data, pos) {
+  readBit(data: Uint8Array, pos: BitPos): number {
     var boff = pos.boff;
     pos.boff++;
 
     return (data[boff >> 3] >> (boff & 7)) & 1;
   }
 
-  mipmapB(buff, w, h) {
+  mipmapB(buff: Uint8Array, w: number, h: number): Uint8Array<ArrayBuffer> {
     var nw = w >> 1,
       nh = h >> 1;
     var nbuf = new Uint8Array(nw * nh * 4);
@@ -640,12 +655,11 @@ export class DDSUtils {
     return nbuf;
   }
 
-  colorDist(r, g, b, r0, g0, b0) {
+  colorDist(r: number, g: number, b: number, r0: number, g0: number, b0: number): number {
     return (r - r0) * (r - r0) + (g - g0) * (g - g0) + (b - b0) * (b - b0);
   }
 
-  mostDistant(sqr) {
-    var dist = this.colorDist;
+  mostDistant(sqr: Uint8Array): number {
     var ends = 0,
       dd = 0;
     for (var i = 0; i < 64; i += 4) {
@@ -653,7 +667,7 @@ export class DDSUtils {
         g = sqr[i + 1],
         b = sqr[i + 2];
       for (var j = i + 4; j < 64; j += 4) {
-        var dst = dist(r, g, b, sqr[j], sqr[j + 1], sqr[j + 2]);
+        var dst = this.colorDist(r, g, b, sqr[j], sqr[j + 1], sqr[j + 2]);
         if (dst > dd) {
           dd = dst;
           ends = (i << 8) | j;
@@ -666,7 +680,7 @@ export class DDSUtils {
 
   // ── I/O helpers ─────────────────────────────────────────────────────────────
 
-  readUintLE(buff, p) {
+  readUintLE(buff: Uint8Array, p: number): number {
     this._int8[0] = buff[p + 0];
     this._int8[1] = buff[p + 1];
     this._int8[2] = buff[p + 2];
@@ -675,7 +689,7 @@ export class DDSUtils {
     return this._int[0];
   }
 
-  writeUintLE(buff, p, n) {
+  writeUintLE(buff: Uint8Array, p: number, n: number): void {
     this._int[0] = n;
     buff[p + 0] = this._int8[0];
     buff[p + 1] = this._int8[1];
@@ -683,7 +697,7 @@ export class DDSUtils {
     buff[p + 3] = this._int8[3];
   }
 
-  readASCII(buff, p, l) {
+  readASCII(buff: Uint8Array, p: number, l: number): string {
     let s = '';
     for (let i = 0; i < l; i++) {
       s += String.fromCharCode(buff[p + i]);
@@ -692,7 +706,7 @@ export class DDSUtils {
     return s;
   }
 
-  writeASCII(buff, p, s) {
+  writeASCII(buff: Uint8Array, p: number, s: string): void {
     for (let i = 0; i < s.length; i++) {
       buff[p + i] = s.charCodeAt(i);
     }
