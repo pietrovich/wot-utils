@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DDSUtils } from '../../src/lib/utex-mod/DDSUtils.js';
+import { DDSUtils } from '../../../src/lib/utex-mod/DDSUtils.js';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
