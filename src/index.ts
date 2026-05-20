@@ -12,8 +12,12 @@ import { charsCommand } from './commands/chars.js';
 import { renderCommand } from './commands/render.js';
 import { pickCommand } from './commands/pick.js';
 import { inspectAtlasCommand } from './commands/inspect-atlas.js';
+import { extractAtlasCommand } from './commands/extract-atlas.js';
+import { packAtlasCommand } from './commands/pack-atlas.js';
+import { AtlasManager } from './lib/atlas-manager.js';
 
 const app = new App();
+const atlasManager = new AtlasManager();
 const program = new Command();
 
 program.name('pie-wot').description('CLI utilities for World of Tanks data and assets').version('0.1.0');
@@ -27,8 +31,10 @@ vehicle.addCommand(bestConfigCommand(app));
 vehicle.addCommand(charsCommand(app));
 
 const atlas = new Command('atlas').description('Texture atlas tools');
-atlas.addCommand(inspectAtlasCommand());
-atlas.addCommand(pickCommand());
+atlas.addCommand(inspectAtlasCommand(atlasManager));
+atlas.addCommand(pickCommand(atlasManager));
+atlas.addCommand(extractAtlasCommand(atlasManager));
+atlas.addCommand(packAtlasCommand(atlasManager));
 
 const font = new Command('font').description('Pixel font tools');
 font.addCommand(renderCommand());
