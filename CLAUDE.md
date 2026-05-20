@@ -6,6 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Never commit anything unless the user explicitly asks to.
 
+## Commit messages
+
+Focus on the *why* — what problem is solved or what capability is added. Implementation
+details (data structures, method names, algorithmic choices) belong in the diff, not the
+message. One concise sentence or short paragraph is enough.
+
+## Pull request descriptions
+
+Describe the *result* — what the user gets and why it matters. Do not narrate
+implementation details or internal design decisions. A short prose summary plus a ticked
+test-plan checklist is the expected format:
+
+```
+Short description of what was added or changed and why.
+
+## Test plan
+- [x] key observable behaviour to verify
+```
+
 **Do not read or analyse gitignored directories** (`./samples`, `./notes`, `./.data`, `./.wg-data`, etc.). Only read a
 specific file from those locations if the user explicitly points to it.
 

@@ -17,6 +17,7 @@ import { packAtlasCommand } from '~/commands/atlas/pack.js';
 import { AtlasManager } from '~/lib/atlas-manager.js';
 import { ddsDecodeCommand } from '~/commands/dds/decode.js';
 import { ddsEncodeCommand } from '~/commands/dds/encode.js';
+import { dumpBackgroundCommand } from '~/commands/icon/dump-background.js';
 
 const app = new App();
 const atlasManager = new AtlasManager();
@@ -53,5 +54,9 @@ program.addCommand(atlas);
 program.addCommand(font);
 program.addCommand(cache);
 program.addCommand(dds);
+
+const icon = new Command('icon').description('Vehicle icon generation tools');
+icon.addCommand(dumpBackgroundCommand());
+program.addCommand(icon);
 
 await program.parseAsync();
