@@ -7,11 +7,9 @@ export function listVehiclesCommand(app: App): Command {
   return new Command('list-vehicles')
     .description('List all vehicles from the WoT encyclopedia')
     .option('--table', 'render output as a table')
-    .option('--no-cache', 'bypass cache and fetch fresh data')
-    .option('--all', 'cache all vehicles (default: only first 3 are cached)')
     .action(async (options) => {
       try {
-        const data = await app.getVehicles({ useCache: options.cache, cacheAll: options.all });
+        const data = await app.getVehicles();
 
         if (options.table) {
           printVehiclesTable(data);

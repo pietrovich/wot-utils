@@ -3,7 +3,7 @@ import { join, dirname, basename } from 'node:path';
 import { getAppId } from './lib/config.js';
 import { WGApiError } from './lib/api.js';
 import { getCached, setCached, purgeCache as purgeCacheLib } from './lib/cache.js';
-import type { VehiclesData, WGApiResponse } from './types.js';
+import type { Vehicle, VehiclesData, WGApiResponse, ModuleType, ModuleNode } from './types.js';
 
 async function fileExists(path: string): Promise<boolean> {
   try {
@@ -27,36 +27,30 @@ async function downloadIcon(url: string, dest: string): Promise<void> {
 
 export class App {
   private readonly appId: string;
+  private readonly limitOutput: number = 10000;
+  private vehicles: VehiclesData | null = null;
 
   constructor() {
     this.appId = getAppId();
+    this.limitOutput = process.env.LIMIT_OUTPUT ? Number(process.env.LIMIT_OUTPUT) : 3;
   }
 
-  async getVehicles({
-    useCache = true,
-    cacheAll = false,
-  }: { useCache?: boolean; cacheAll?: boolean } = {}): Promise<VehiclesData> {
-    const endpoint = 'encyclopedia/vehicles';
-    const limit = cacheAll ? undefined : 3;
-    const params: Record<string, string> = {};
-    if (limit) {
-      params.limit = String(limit);
-    }
+  async getVehicles(): Promise<Vehicle[]> {
+    if (!this.vehicles) {
+      const endpoint = 'encyclopedia/vehicles';
+      const cached = await getCached<VehiclesData>('list-vehicles', endpoint);
 
-    if (useCache) {
-      const cached = await getCached<VehiclesData>('list-vehicles', endpoint, params);
       if (cached) {
-        return cached;
+        this.vehicles = cached;
+        return Object.values(cached);
       }
+
+      this.vehicles = await this.fetchVehicles();
+
+      await setCached('list-vehicles', endpoint, {}, this.vehicles);
     }
 
-    const data = await this.fetchVehicles(limit);
-
-    if (useCache) {
-      await setCached('list-vehicles', endpoint, params, data);
-    }
-
-    return data;
+    return Object.values(this.vehicles);
   }
 
   async exportVehicles({ output, useCache = true }: { output?: string; useCache?: boolean } = {}): Promise<void> {
@@ -87,7 +81,7 @@ export class App {
     const iconsDir = join(dirname(cacheDir), 'contour-icons');
     await mkdir(iconsDir, { recursive: true });
 
-    const all = Object.values(vehicles);
+    const all = vehicles;
     let downloaded = 0;
     let skipped = 0;
     let failed = 0;
@@ -126,11 +120,93 @@ export class App {
     console.error(`\nDone: ${downloaded} downloaded, ${skipped} skipped, ${failed} failed`);
   }
 
+  async inferBestConfig(query: number | string): Promise<Record<ModuleType, number>> {
+    const vehicle = await this.findVehicle(query);
+
+    const byType = new Map<ModuleType, ModuleNode[]>();
+    for (const node of Object.values(vehicle.modules_tree)) {
+      const list = byType.get(node.type) ?? [];
+      list.push(node);
+      byType.set(node.type, list);
+    }
+
+    const result = {} as Record<ModuleType, number>;
+    for (const [type, modules] of byType) {
+      const terminals = modules.filter((m) => m.next_modules === null);
+      const candidates = terminals.length > 0 ? terminals : modules;
+      result[type] = candidates.reduce((a, b) => (b.module_id > a.module_id ? b : a)).module_id;
+    }
+
+    return result;
+  }
+
+  configToProfileId(config: Partial<Record<ModuleType, number>>): string {
+    return Object.values(config)
+      .filter((id): id is number => id != null)
+      .sort((a, b) => a - b)
+      .join('-');
+  }
+
+  async getStatsForBestConfig(query: number | string): Promise<unknown> {
+    const vehicle = await this.findVehicle(query);
+    const config = await this.inferBestConfig(query);
+    const profileId = this.configToProfileId(config);
+
+    const endpoint = 'encyclopedia/vehicleprofile';
+    const params = {
+      application_id: this.appId,
+      tank_id: String(vehicle.tank_id),
+      profile_id: profileId,
+    };
+
+    const cached = await getCached<unknown>('vehicle-profile', endpoint, params);
+    if (cached) {
+      return cached;
+    }
+
+    const url = new URL(`https://api.worldoftanks.eu/wot/${endpoint}/`);
+    for (const [k, v] of Object.entries(params)) {
+      url.searchParams.set(k, v);
+    }
+
+    const response = await fetch(url.toString());
+    const json = (await response.json()) as WGApiResponse<unknown>;
+
+    if (json.status === 'error') {
+      const err = json.error!;
+      throw new WGApiError(err.field, err.code, err.message);
+    }
+
+    const data = json.data!;
+    await setCached('vehicle-profile', endpoint, params, data);
+
+    return data;
+  }
+
   async purgeCache(): Promise<void> {
     await purgeCacheLib();
   }
 
-  private async fetchVehicles(limit?: number): Promise<VehiclesData> {
+  private async findVehicle(query: number | string): Promise<Vehicle> {
+    const vehicles = await this.getVehicles();
+    const q = String(query);
+    const isId = /^\d+$/.test(q);
+    const vehicle = vehicles.find((v) => {
+      if (isId) {
+        return v.tank_id === Number(q);
+      }
+
+      return v.tag === q || v.short_name === q;
+    });
+
+    if (!vehicle) {
+      throw new Error(`Vehicle not found: ${query}`);
+    }
+
+    return vehicle;
+  }
+
+  private async fetchVehicles(): Promise<VehiclesData> {
     const fields = [
       '-crew',
       '-default_profile',
@@ -144,10 +220,6 @@ export class App {
     const url = new URL('https://api.worldoftanks.eu/wot/encyclopedia/vehicles/');
     url.searchParams.set('application_id', this.appId);
     // url.searchParams.set('fields', fields);
-
-    if (limit) {
-      url.searchParams.set('limit', String(limit));
-    }
 
     const tmp = `${url.toString()}&fields=${fields}`;
     const response = await fetch(tmp);
