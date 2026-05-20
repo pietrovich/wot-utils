@@ -3,9 +3,13 @@
 import * as C from './dd-constants.js';
 
 export class DDSUtils {
+  // Reusable scratch buffers — allocated once per instance to avoid per-call
+  // heap pressure in tight decode/encode loops. WARNING: contents are not
+  // cleared between calls; never hold a reference to these across method
+  // invocations or assume they are zero-initialised on entry.
   _int8 = new Uint8Array(4);
-  _int = new Uint32Array(this._int8.buffer);
-  _arr16 = new Uint8Array(16);
+  _int = new Uint32Array(this._int8.buffer); // shares memory with _int8 for LE uint32 reinterpretation
+  _arr16 = new Uint8Array(16); // 4-color palette slot for readBCcolor (16 RGBA entries × 1 byte)
 
   // ── public API ──────────────────────────────────────────────────────────────
 
