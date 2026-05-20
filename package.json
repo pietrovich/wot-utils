@@ -4,7 +4,7 @@
   "description": "CLI utilities for World of Tanks data and assets",
   "type": "module",
   "bin": {
-    "pie-wot": "dist/index.js"
+    "pie-wot": "bin/pie-wot.cjs"
   },
   "scripts": {
     "start": "tsx src/index.ts",
