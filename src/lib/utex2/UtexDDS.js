@@ -43,10 +43,10 @@ export class UtexDDS {
       } else if (fmt == 'DXT1') offset = utex.readBC1(data, offset, img, w, h);
       else if (fmt == 'DXT3') offset = utex.readBC2(data, offset, img, w, h);
       else if (fmt == 'DXT5') offset = utex.readBC3(data, offset, img, w, h);
-      else if (fmt == 'DX10') offset = utex.readBC7(data, offset, img, w, h);
-      else if (fmt == 'ATC ') offset = utex.readATC(data, offset, img, w, h);
-      else if (fmt == 'ATCA') offset = utex.readATA(data, offset, img, w, h);
-      else if (fmt == 'ATCI') offset = utex.readATA(data, offset, img, w, h);
+      else if (fmt == 'DX10') throw new Error('Not supported: BC7 (DX10)');
+      else if (fmt == 'ATC ') throw new Error('Not supported: ATC');
+      else if (fmt == 'ATCA') throw new Error('Not supported: ATCA');
+      else if (fmt == 'ATCI') throw new Error('Not supported: ATCI');
       else if (pf.flags & C.DDPF_ALPHAPIXELS && pf.flags & C.DDPF_RGB) {
         if (bc == 32) {
           for (var i = 0; i < img.length; i++) img[i] = data[offset + i];
