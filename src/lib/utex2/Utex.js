@@ -4,6 +4,8 @@
 export class Utex {
   readATC(data, offset, img, w, h)
   {
+    /* c8 ignore start */
+    throw new Error('Not implemented: readATC');
     var pos = {boff:offset*8};
     var sqr = new Uint8Array(4*4*4);
 
@@ -15,9 +17,12 @@ export class Utex {
         offset += 8;
       }
     return offset;
+    /* c8 ignore stop */
   }
   readATA(data, offset, img, w, h)
   {
+    /* c8 ignore start */
+    throw new Error('Not implemented: readATA');
     var pos = {boff:offset*8};
     var sqr = new Uint8Array(4*4*4);
 
@@ -34,6 +39,7 @@ export class Utex {
         offset += 16;  pos.boff+=64;
       }
     return offset;
+    /* c8 ignore stop */
   }
 
   readBC1(data, offset, img, w, h)
@@ -158,6 +164,8 @@ export class Utex {
   _arr16 = new Uint8Array(16);
   readATCcolor(data, offset, sqr)
   {
+    /* c8 ignore start */
+    throw new Error('Not implemented: readATCcolor');
     var c0 = (data[offset+1]<<8)|data[offset  ];
     var c1 = (data[offset+3]<<8)|data[offset+2];
 
@@ -173,6 +181,7 @@ export class Utex {
     clr[ 8] = ~~(fr*c0r + ifr*c1r);  clr[ 9] = ~~(fr*c0g + ifr*c1g);  clr[10] = ~~(fr*c0b + ifr*c1b);  clr[11] = 255;
 
     this.toSquare(data, sqr, clr, offset);
+    /* c8 ignore stop */
   }
 
   readBCcolor(data, offset, sqr)
@@ -283,6 +292,8 @@ export class Utex {
 
   readBC7(data, offset, img, w, h)
   {
+    /* c8 ignore start */
+    throw new Error('Not implemented: readBC7');
     var rB = this.readBits;
     var pos = {boff:0};
     var sqr = new Uint8Array(4*4*4);
@@ -395,6 +406,7 @@ export class Utex {
         offset += 16;
       }
     return offset;
+    /* c8 ignore stop */
   }
 
   rotate(sqr, rot){
