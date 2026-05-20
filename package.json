@@ -23,7 +23,6 @@
     "commander": "^13.1.0",
     "dotenv": "^16.5.0",
     "fast-xml-parser": "^5.8.0",
-    "jimp": "^1.6.1",
     "maxrects-packer": "^2.7.3",
     "pngjs": "^7.0.0",
     "sharp": "^0.34.5"
