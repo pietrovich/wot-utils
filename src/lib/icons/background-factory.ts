@@ -1,5 +1,4 @@
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
 import sharp from 'sharp';
 import { bgColors } from './background-colors.js';
 
@@ -105,21 +104,23 @@ function buildOverlayBar(): CompositeInput {
 
 // ——————————————————————————————————————————————————————————————————————————
 
-function buildGradientBuffer(rows: [number, number, number][]): Buffer {
-  const png = new PNG({ width: WIDTH, height: rows.length });
+function buildGradientBuffer(rows: [number, number, number][]): { input: Buffer; raw: sharp.Raw } {
+  const width = WIDTH;
+  const height = rows.length;
+  const pixels = Buffer.alloc(width * height * 4);
 
-  for (let y = 0; y < rows.length; y++) {
+  for (let y = 0; y < height; y++) {
     const [r, g, b] = rows[y];
-    for (let x = 0; x < WIDTH; x++) {
-      const i = (y * WIDTH + x) * 4;
-      png.data[i]     = r;
-      png.data[i + 1] = g;
-      png.data[i + 2] = b;
-      png.data[i + 3] = 255;
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      pixels[i]     = r;
+      pixels[i + 1] = g;
+      pixels[i + 2] = b;
+      pixels[i + 3] = 255;
     }
   }
 
-  return PNG.sync.write(png);
+  return { input: pixels, raw: { width, height, channels: 4 } };
 }
 
 export class BackgroundFactory {
@@ -139,9 +140,9 @@ export class BackgroundFactory {
       throw new Error(`Unknown tank type: "${type}"`);
     }
 
-    const gradientBuf = buildGradientBuffer(rows);
+    const gradient = buildGradientBuffer(rows);
 
-    return sharp(gradientBuf)
+    return sharp(gradient.input, { raw: gradient.raw })
       .composite([this.getOverlayBar(), { input: SHIELD_PATH, top: 0, left: 0 }])
       .png()
       .toBuffer();
