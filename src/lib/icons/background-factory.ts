@@ -1,16 +1,9 @@
-import { existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import sharp from 'sharp';
+import { findPkgRoot } from '../pkg-root.js';
 import { bgColors } from './background-colors.js';
 
 const WIDTH = 80;
-
-function findPkgRoot(url: URL): string {
-  let d = dirname(fileURLToPath(url));
-  while (!existsSync(resolve(d, 'package.json'))) { d = dirname(d); }
-  return d;
-}
 
 const SHIELD_PATH = resolve(findPkgRoot(new URL(import.meta.url)), 'assets/pogs/sheild.png');
 

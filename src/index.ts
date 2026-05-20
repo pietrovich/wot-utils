@@ -1,4 +1,7 @@
-import 'dotenv/config';
+import { resolve } from 'node:path';
+import { config } from 'dotenv';
+import { findPkgRoot } from '~/lib/pkg-root.js';
+config({ path: resolve(findPkgRoot(new URL(import.meta.url)), '.env') });
 import { Command } from 'commander';
 import { App } from '~/app.js';
 import { listVehiclesCommand } from '~/commands/vehicle/list.js';
