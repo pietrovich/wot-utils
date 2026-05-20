@@ -183,6 +183,48 @@ export class App {
     return data;
   }
 
+  async getShortNameStats(): Promise<{
+    uniqueCharacters: string;
+    maxLength: number;
+    longestShortName: string;
+    avgLength: number;
+    medianLength: number;
+    p80Length: number;
+    p90Length: number;
+  }> {
+    const vehicles = await this.getVehicles();
+    const chars = new Set<string>();
+    let longestShortName = '';
+    const lengths: number[] = [];
+
+    for (const v of vehicles) {
+      for (const c of v.short_name) {
+        chars.add(c);
+      }
+      lengths.push(v.short_name.length);
+      if (v.short_name.length > longestShortName.length) {
+        longestShortName = v.short_name;
+      }
+    }
+
+    const sorted = [...lengths].sort((a, b) => a - b);
+    const n = sorted.length;
+    const avgLength = Math.round(lengths.reduce((s, l) => s + l, 0) / n);
+    const medianLength = n % 2 === 0 ? (sorted[n / 2 - 1] + sorted[n / 2]) / 2 : sorted[Math.floor(n / 2)];
+    const p80Length = sorted[Math.ceil(0.8 * n) - 1];
+    const p90Length = sorted[Math.ceil(0.9 * n) - 1];
+
+    return {
+      uniqueCharacters: [...chars].sort().join(''),
+      maxLength: sorted[n - 1],
+      longestShortName,
+      avgLength,
+      medianLength,
+      p80Length,
+      p90Length,
+    };
+  }
+
   async purgeCache(): Promise<void> {
     await purgeCacheLib();
   }

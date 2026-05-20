@@ -8,6 +8,7 @@ import { fetchIconsCommand } from './commands/fetch-icons.js';
 import { cachePurgeCommand } from './commands/cache-purge.js';
 import { bestConfigCommand } from './commands/best-config.js';
 import { vehicleStatsCommand } from './commands/vehicle-stats.js';
+import { charsCommand } from './commands/chars.js';
 
 const app = new App();
 const program = new Command();
@@ -20,5 +21,6 @@ program.addCommand(fetchIconsCommand(app));
 program.addCommand(cachePurgeCommand(app));
 program.addCommand(bestConfigCommand(app));
 program.addCommand(vehicleStatsCommand(app));
+program.addCommand(charsCommand(app));
 
 await program.parseAsync();
