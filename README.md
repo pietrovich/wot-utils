@@ -18,6 +18,12 @@ Get a free application ID at [developers.wargaming.net](https://developers.warga
 
 > **Node.js ≥ 24** required. No build step — `tsx` runs TypeScript directly.
 
+## Uninstall
+
+```bash
+npm unlink -g pie-wot-utils   # removes pie-wot from PATH
+```
+
 ## Commands
 
 ```
