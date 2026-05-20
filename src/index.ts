@@ -10,6 +10,7 @@ import { bestConfigCommand } from './commands/best-config.js';
 import { vehicleStatsCommand } from './commands/vehicle-stats.js';
 import { charsCommand } from './commands/chars.js';
 import { renderCommand } from './commands/render.js';
+import { pickCommand } from './commands/pick.js';
 
 const app = new App();
 const program = new Command();
@@ -24,5 +25,6 @@ program.addCommand(bestConfigCommand(app));
 program.addCommand(vehicleStatsCommand(app));
 program.addCommand(charsCommand(app));
 program.addCommand(renderCommand());
+program.addCommand(pickCommand());
 
 await program.parseAsync();
