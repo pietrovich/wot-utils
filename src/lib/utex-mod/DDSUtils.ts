@@ -1,4 +1,4 @@
-// noinspection ES6ConvertVarToLetConst,LanguageDetectionInspection,DuplicatedCode,OverlyComplexFunctionJS,SpellCheckingInspection,EqualityComparisonWithCoercionJS,JSDuplicatedDeclaration,PointlessArithmeticExpressionJS,FunctionTooLongJS
+// noinspection ES6ConvertVarToLetConst,LanguageDetectionInspection,DuplicatedCode,OverlyComplexFunctionJS,SpellCheckingInspection,EqualityComparisonWithCoercionJS,JSDuplicatedDeclaration,PointlessArithmeticExpressionJS,FunctionTooLongJS,OverlyNestedFunctionJS
 /* eslint-disable */
 
 export type DDSFrame = { width: number; height: number; image: ArrayBuffer };
@@ -34,18 +34,15 @@ export class DDSUtils {
   static DDSD_CAPS        = 0x1;       // always required
   static DDSD_HEIGHT      = 0x2;       // always required
   static DDSD_WIDTH       = 0x4;       // always required
-  static DDSD_PITCH       = 0x8;
   static DDSD_PIXELFORMAT = 0x1000;    // always required
   static DDSD_MIPMAPCOUNT = 0x20000;
   static DDSD_LINEARSIZE  = 0x80000;
-  static DDSD_DEPTH       = 0x800000;
 
   // ── DDS pixel format flags ──────────────────────────────────────────────────
   static DDPF_ALPHAPIXELS = 0x1;
   static DDPF_ALPHA       = 0x2;
   static DDPF_FOURCC      = 0x4;
   static DDPF_RGB         = 0x40;
-  static DDPF_YUV         = 0x200;
   static DDPF_LUMINANCE   = 0x20000;
 
   // ── DDS caps flags ──────────────────────────────────────────────────────────
@@ -174,8 +171,6 @@ export class DDSUtils {
     hd.caps3 = this.readUintLE(data, offset);
     offset += 4;
     hd.caps4 = this.readUintLE(data, offset);
-    offset += 4;
-    offset += 4; // reserved, zeros
 
     return hd;
   }
@@ -206,8 +201,6 @@ export class DDSUtils {
     this.writePixFormat(data, gotAlpha, offset);
     offset += 32;
     this.writeUintLE(data, offset, caps);
-    offset += 4;
-    offset += 4 * 4;
   }
 
   readPixFormat(data: Uint8Array, offset: number): DDSPixelFormat {
@@ -226,7 +219,6 @@ export class DDSUtils {
     pf.BMask = this.readUintLE(data, offset);
     offset += 4;
     pf.AMask = this.readUintLE(data, offset);
-    offset += 4;
 
     return pf;
   }
@@ -239,8 +231,6 @@ export class DDSUtils {
     this.writeUintLE(data, offset, flgs);
     offset += 4;
     this.writeASCII(data, offset, gotAlpha ? 'DXT5' : 'DXT1');
-    offset += 4;
-    offset += 5 * 4;
   }
 
   // ── BC codec ────────────────────────────────────────────────────────────────
@@ -364,7 +354,6 @@ export class DDSUtils {
         offset += 2;
 
         var al = this.inter8(max, min);
-        var boff = (offset + 2) << 3;
         for (var i = 0; i < 64; i += 32) {
           var bits = 0,
             boff = 0;
