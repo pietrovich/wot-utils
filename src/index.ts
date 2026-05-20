@@ -16,7 +16,7 @@ import { inspectAtlasCommand } from './commands/inspect-atlas.js';
 const app = new App();
 const program = new Command();
 
-program.name('wg-fetcher').description('Fetch World of Tanks data from the Wargaming API').version('0.1.0');
+program.name('pie-wot').description('CLI utilities for World of Tanks data and assets').version('0.1.0');
 
 const vehicle = new Command('vehicle').description('WoT vehicle data');
 vehicle.addCommand(listVehiclesCommand(app));
