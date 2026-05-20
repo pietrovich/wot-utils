@@ -31,7 +31,8 @@ specific file from those locations if the user explicitly points to it.
 ## Commands
 
 ```bash
-npm start                                   # run CLI via tsx (no build needed)
+npm run build                               # compile src/ → dist/ via tsup (required before npm link)
+npm start                                   # run CLI directly via tsx (no build needed)
 npx tsx src/index.ts --help                 # same, explicit
 
 npm test                                    # run all tests (vitest)

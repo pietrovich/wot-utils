@@ -10,6 +10,7 @@ The long-term goal is to make it trivial to maintain and publish a custom icon s
 git clone https://github.com/pietrovich/wot-utils.git
 cd wot-utils
 npm install
+npm run build         # compile to dist/
 npm link              # registers pie-wot in your PATH
 cp .env.example .env  # add your WG_APP_ID
 ```

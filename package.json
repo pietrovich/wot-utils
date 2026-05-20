@@ -4,9 +4,10 @@
   "description": "CLI utilities for World of Tanks data and assets",
   "type": "module",
   "bin": {
-    "pie-wot": "bin/pie-wot.cjs"
+    "pie-wot": "dist/index.js"
   },
   "scripts": {
+    "build": "tsup",
     "start": "tsx src/index.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -25,8 +26,7 @@
     "fast-xml-parser": "^5.8.0",
     "maxrects-packer": "^2.7.3",
     "pngjs": "^7.0.0",
-    "sharp": "^0.34.5",
-    "tsx": "^4.22.3"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -35,6 +35,8 @@
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.5",
     "prettier": "^3.8.3",
+    "tsup": "^8.5.1",
+    "tsx": "^4.22.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1",
     "vitest": "^3.1.3"
