@@ -15,6 +15,8 @@ import { inspectAtlasCommand } from '~/commands/atlas/inspect.js';
 import { extractAtlasCommand } from '~/commands/atlas/extract.js';
 import { packAtlasCommand } from '~/commands/atlas/pack.js';
 import { AtlasManager } from '~/lib/atlas-manager.js';
+import { ddsDecodeCommand } from '~/commands/dds/decode.js';
+import { ddsEncodeCommand } from '~/commands/dds/encode.js';
 
 const app = new App();
 const atlasManager = new AtlasManager();
@@ -42,9 +44,14 @@ font.addCommand(renderCommand());
 const cache = new Command('cache').description('API response cache');
 cache.addCommand(cachePurgeCommand(app));
 
+const dds = new Command('dds').description('DDS texture tools');
+dds.addCommand(ddsDecodeCommand());
+dds.addCommand(ddsEncodeCommand());
+
 program.addCommand(vehicle);
 program.addCommand(atlas);
 program.addCommand(font);
 program.addCommand(cache);
+program.addCommand(dds);
 
 await program.parseAsync();

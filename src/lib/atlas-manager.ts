@@ -30,6 +30,7 @@ function copyRegion(src: PNG, region: TextureRegion): PNG {
     const dstOffset = row * region.width * 4;
     src.data.copy(out.data, dstOffset, srcOffset, srcOffset + region.width * 4);
   }
+
   return out;
 }
 
@@ -46,12 +47,14 @@ function buildXml(regions: Array<{ name: string; x: number; y: number; width: nu
         `  </SubTexture>`,
     )
     .join('\n');
+
   return `<root>\n${entries}\n</root>\n`;
 }
 
 export class AtlasManager {
   async listNames(mapPath: string): Promise<string[]> {
     const regions = await readTextureAtlas(mapPath);
+
     return regions.map((r) => r.name).sort();
   }
 
@@ -61,7 +64,9 @@ export class AtlasManager {
     if (!region) {
       return null;
     }
+
     const src = PNG.sync.read(await readFile(imagePath));
+
     return copyRegion(src, region);
   }
 
@@ -90,6 +95,7 @@ export class AtlasManager {
     const entries: TextureRect[] = await Promise.all(
       files.map(async (file) => {
         const png = PNG.sync.read(await readFile(join(srcDir, file)));
+
         return { name: basename(file, '.png'), png, x: 0, y: 0, width: png.width, height: png.height };
       }),
     );
@@ -115,6 +121,7 @@ export class AtlasManager {
         const dstOffset = ((y + row) * bin.width + x) * 4;
         png.data.copy(out.data, dstOffset, srcOffset, srcOffset + width * 4);
       }
+
       regions.push({ name, x, y, width, height });
     }
 

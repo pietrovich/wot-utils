@@ -26,7 +26,7 @@ interface TableRow {
 function formatArmor(a: Armor): string {
   try {
     return `${a.front} / ${a.sides} / ${a.rear}`;
-  } catch (e) {
+  } catch {
     return '';
   }
 }
@@ -117,6 +117,7 @@ export function vehicleStatsCommand(app: App): Command {
           }
 
           printTable(rows);
+
           return;
         }
 
@@ -124,6 +125,7 @@ export function vehicleStatsCommand(app: App): Command {
 
         if (options.raw) {
           console.log(JSON.stringify(result, null, 2));
+
           return;
         }
 

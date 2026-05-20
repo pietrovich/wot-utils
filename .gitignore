@@ -10,3 +10,4 @@ dist/
 notes/
 *.png
 samples/
+coverage/
