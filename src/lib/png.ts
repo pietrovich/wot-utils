@@ -7,8 +7,10 @@ const CRC_TABLE = (() => {
     for (let k = 0; k < 8; k++) {
       c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
     }
+
     table[n] = c;
   }
+
   return table;
 })();
 
@@ -17,6 +19,7 @@ function crc32(buf: Buffer): number {
   for (const byte of buf) {
     crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
   }
+
   return (crc ^ 0xffffffff) >>> 0;
 }
 
@@ -26,6 +29,7 @@ function makeChunk(type: string, data: Buffer): Buffer {
   const typeBytes = Buffer.from(type, 'ascii');
   const crcBuf = Buffer.alloc(4);
   crcBuf.writeUInt32BE(crc32(Buffer.concat([typeBytes, data])), 0);
+
   return Buffer.concat([len, typeBytes, data, crcBuf]);
 }
 
@@ -46,6 +50,7 @@ export function encodePng(width: number, height: number, rgb: Buffer): Buffer {
   }
 
   const PNG_SIG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+
   return Buffer.concat([
     PNG_SIG,
     makeChunk('IHDR', ihdr),

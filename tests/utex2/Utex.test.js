@@ -9,6 +9,7 @@ function solidBlock(r, g, b, a = 255) {
   for (let i = 0; i < 64; i += 4) {
     buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = a;
   }
+
   return buf;
 }
 
@@ -256,6 +257,7 @@ describe('Utex', () => {
       for (let i = 0; i < 64; i += 4) {
         sqr[i] = r; sqr[i + 1] = g; sqr[i + 2] = b; sqr[i + 3] = a;
       }
+
       return sqr;
     }
 
@@ -318,6 +320,7 @@ describe('Utex', () => {
       // 2×2 all-red, fully opaque — mipmapB takes a Uint8Array, not ArrayBuffer
       const buf = new Uint8Array(2 * 2 * 4);
       for (let i = 0; i < buf.length; i += 4) { buf[i] = 255; buf[i + 3] = 255; }
+
       const result = utex.mipmapB(buf, 2, 2);
       expect(result[0]).toBe(255); // R
       expect(result[1]).toBe(0);   // G
@@ -464,6 +467,7 @@ describe('Utex', () => {
       utex.writeBC1(src, 4, 4, compressed, 0);
       const decoded = new Uint8Array(64);
       utex.readBC1(compressed, 0, decoded, 4, 4);
+
       return decoded;
     }
 
@@ -598,6 +602,7 @@ describe('Utex', () => {
       utex.writeBC3(src, 4, 4, compressed, 0);
       const decoded = new Uint8Array(64);
       utex.readBC3(compressed, 0, decoded, 4, 4);
+
       return decoded;
     }
 

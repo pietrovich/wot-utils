@@ -29,6 +29,7 @@ export class UtexUtils {
     for (let i = 0; i < l; i++) {
       s += String.fromCharCode(buff[p + i]);
     }
+
     return s;
   }
 

@@ -6,22 +6,24 @@ export class Utex {
     var sqr = new Uint8Array(4 * 4 * 4);
 
     for (var y = 0; y < h; y += 4)
-      for (var x = 0; x < w; x += 4) {
+      {for (var x = 0; x < w; x += 4) {
         this.readBCcolor(data, offset, sqr);
         this.write4x4(img, w, h, x, y, sqr);
         offset += 8;
-      }
+      }}
+
     return offset;
   }
 
   writeBC1(img, w, h, data, offset) {
     var sqr = new Uint8Array(16 * 4);
     for (var y = 0; y < h; y += 4)
-      for (var x = 0; x < w; x += 4) {
+      {for (var x = 0; x < w; x += 4) {
         this.read4x4(img, w, h, x, y, sqr);
         this.writeBCcolor(data, offset, sqr);
         offset += 8;
-      }
+      }}
+
     return offset;
   }
 
@@ -30,16 +32,18 @@ export class Utex {
     var sqr = new Uint8Array(4 * 4 * 4);
 
     for (var y = 0; y < h; y += 4)
-      for (var x = 0; x < w; x += 4) {
+      {for (var x = 0; x < w; x += 4) {
         this.readBCcolor(data, offset + 8, sqr);
         for (var i = 0; i < 64; i += 4) {
           var code = this.readBits(data, pos, 4);
           sqr[i + 3] = 255 * (code / 15);
         }
+
         this.write4x4(img, w, h, x, y, sqr);
         offset += 16;
         pos.boff += 64;
-      }
+      }}
+
     return offset;
   }
 
@@ -47,23 +51,24 @@ export class Utex {
     var al = [a, b];
 
     if (a > b)
-      al.push(
+      {al.push(
         (6 / 7) * a + (1 / 7) * b, // bit code 010
         (5 / 7) * a + (2 / 7) * b, // bit code 011
         (4 / 7) * a + (3 / 7) * b, // bit code 100
         (3 / 7) * a + (4 / 7) * b, // bit code 101
         (2 / 7) * a + (5 / 7) * b, // bit code 110
         (1 / 7) * a + (6 / 7) * b,
-      );
+      );}
     else
-      al.push(
+      {al.push(
         (4 / 5) * a + (1 / 5) * b, // bit code 010
         (3 / 5) * a + (2 / 5) * b, // bit code 011
         (2 / 5) * a + (3 / 5) * b, // bit code 100
         (1 / 5) * a + (4 / 5) * b, // bit code 101
         0, // bit code 110
         255,
-      );
+      );}
+
     return al;
   }
 
@@ -72,7 +77,7 @@ export class Utex {
     var sqr = new Uint8Array(4 * 4 * 4);
 
     for (var y = 0; y < h; y += 4)
-      for (var x = 0; x < w; x += 4) {
+      {for (var x = 0; x < w; x += 4) {
         this.readBCcolor(data, offset + 8, sqr);
 
         var al = this.inter8(data[offset], data[offset + 1]);
@@ -81,24 +86,27 @@ export class Utex {
           var code = this.readBits(data, pos, 3);
           sqr[i + 3] = al[code];
         }
+
         pos.boff += 64;
         this.write4x4(img, w, h, x, y, sqr);
         offset += 16;
-      }
+      }}
+
     return offset;
   }
   writeBC3(img, w, h, data, offset) {
     var sqr = new Uint8Array(16 * 4);
     for (var y = 0; y < h; y += 4)
-      for (var x = 0; x < w; x += 4) {
+      {for (var x = 0; x < w; x += 4) {
         this.read4x4(img, w, h, x, y, sqr);
         var min = sqr[3],
           max = sqr[3];
         for (var i = 7; i < 64; i += 4) {
           var a = sqr[i];
-          if (a < min) min = a;
-          else if (max < a) max = a;
+          if (a < min) {min = a;}
+          else if (max < a) {max = a;}
         }
+
         data[offset] = max;
         data[offset + 1] = min;
         offset += 2;
@@ -119,9 +127,11 @@ export class Utex {
                 code = k;
               }
             }
+
             bits = bits | (code << boff);
             boff += 3;
           }
+
           data[offset] = bits;
           data[offset + 1] = bits >> 8;
           data[offset + 2] = bits >> 16;
@@ -130,7 +140,8 @@ export class Utex {
 
         this.writeBCcolor(data, offset, sqr);
         offset += 8;
-      }
+      }}
+
     return offset;
   }
 
@@ -180,6 +191,7 @@ export class Utex {
       clr[14] = 0;
       clr[15] = 0;
     }
+
     this.toSquare(data, sqr, clr, offset);
   }
   writeBCcolor(data, offset, sqr) {
@@ -237,9 +249,9 @@ export class Utex {
       var dsm = Math.min(ds0, Math.min(ds1, Math.min(ds2, ds3)));
 
       var code = 0;
-      if (dsm == ds1) code = 1;
-      else if (dsm == ds2) code = 2;
-      else if (dsm == ds3) code = 3;
+      if (dsm == ds1) {code = 1;}
+      else if (dsm == ds2) {code = 2;}
+      else if (dsm == ds3) {code = 3;}
 
       data[boff >> 3] |= code << (boff & 7);
       boff += 2;
@@ -307,7 +319,8 @@ export class Utex {
   }
 
   rotate(sqr, rot) {
-    if (rot == 0) return;
+    if (rot == 0) {return;}
+
     for (var i = 0; i < 64; i += 4) {
       var r = sqr[i];
       var g = sqr[i + 1];
@@ -319,11 +332,13 @@ export class Utex {
         a = r;
         r = t;
       }
+
       if (rot == 2) {
         var t = a;
         a = g;
         g = t;
       }
+
       if (rot == 3) {
         var t = a;
         a = b;
@@ -344,12 +359,14 @@ export class Utex {
       out = out | (this.readBit(data, pos) << (ok - k));
       k--;
     }
+
     return out;
   }
 
   readBit(data, pos) {
     var boff = pos.boff;
     pos.boff++;
+
     return (data[boff >> 3] >> (boff & 7)) & 1;
   }
 
@@ -358,7 +375,7 @@ export class Utex {
       nh = h >> 1;
     var nbuf = new Uint8Array(nw * nh * 4);
     for (var y = 0; y < nh; y++)
-      for (var x = 0; x < nw; x++) {
+      {for (var x = 0; x < nw; x++) {
         var ti = (y * nw + x) << 2,
           si = ((y << 1) * w + (x << 1)) << 2;
         //nbuf[ti  ] = buff[si  ];  nbuf[ti+1] = buff[si+1];  nbuf[ti+2] = buff[si+2];  nbuf[ti+3] = buff[si+3];
@@ -383,7 +400,8 @@ export class Utex {
         nbuf[ti + 1] = ~~(g * ia + 0.5);
         nbuf[ti + 2] = ~~(b * ia + 0.5);
         nbuf[ti + 3] = a;
-      }
+      }}
+
     return nbuf;
   }
 
@@ -407,6 +425,7 @@ export class Utex {
         }
       }
     }
+
     return ends;
   }
 }

@@ -16,6 +16,7 @@ export function renderCommand(): Command {
     .action(async (fontName: string | undefined, text: string) => {
       if (!fontName) {
         console.log(Object.keys(fonts).join('\n'));
+
         return;
       }
 
@@ -53,6 +54,7 @@ export function renderCommand(): Command {
             }
           }
         }
+
         x += charWidths[ci] + CHAR_GAP;
       }
 

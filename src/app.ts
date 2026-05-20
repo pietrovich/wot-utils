@@ -42,6 +42,7 @@ export class App {
 
       if (cached) {
         this.vehicles = cached;
+
         return Object.values(cached);
       }
 
@@ -201,6 +202,7 @@ export class App {
       for (const c of v.short_name) {
         chars.add(c);
       }
+
       lengths.push(v.short_name.length);
       if (v.short_name.length > longestShortName.length) {
         longestShortName = v.short_name;

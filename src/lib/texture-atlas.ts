@@ -26,6 +26,7 @@ export async function readTextureAtlas(xmlPath: string): Promise<TextureRegion[]
     if (typeof entry !== 'object' || entry === null) {
       continue;
     }
+
     const e = entry as Record<string, unknown>;
     const name = typeof e.name === 'string' ? e.name.trim() : null;
     const x = Number(e.x);

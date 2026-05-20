@@ -49,8 +49,9 @@ describe('UtexDDS integration', () => {
     let maxDiff = 0;
     for (let i = 0; i < original.length; i++) {
       const diff = Math.abs(original[i] - result[i]);
-      if (diff > 0) diffCount++;
-      if (diff > maxDiff) maxDiff = diff;
+      if (diff > 0) {diffCount++;}
+
+      if (diff > maxDiff) {maxDiff = diff;}
     }
 
     // Report exact diff counts to make failures easy to diagnose

@@ -19,6 +19,7 @@ export function packAtlasCommand(atlas: AtlasManager): Command {
         console.error('Provide --from <dir> or --src <dir>');
         process.exit(1);
       }
+
       if (!toPath) {
         console.error('Provide --to <path> or --dst <path>');
         process.exit(1);

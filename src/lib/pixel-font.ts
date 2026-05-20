@@ -20,9 +20,11 @@ export class PixelFont {
     if (this.pixelCache.has(char)) {
       return this.pixelCache.get(char)!;
     }
+
     const rows = this.getChar(char);
     const pixels = rows === null ? null : rows.map((row) => [...row].map((c) => ALPHA[c] ?? 0x00));
     this.pixelCache.set(char, pixels);
+
     return pixels;
   }
 }

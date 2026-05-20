@@ -40,16 +40,26 @@ export class UtexDDS {
       // console.log('Allocating ', size, 'buffer ...', w, h);
       var img = new Uint8Array(size);
       if (false) {
-      } else if (fmt == 'DXT1') offset = utex.readBC1(data, offset, img, w, h);
-      else if (fmt == 'DXT3') offset = utex.readBC2(data, offset, img, w, h);
-      else if (fmt == 'DXT5') offset = utex.readBC3(data, offset, img, w, h);
-      else if (fmt == 'DX10') throw new Error('Not supported: BC7 (DX10)');
-      else if (fmt == 'ATC ') throw new Error('Not supported: ATC');
-      else if (fmt == 'ATCA') throw new Error('Not supported: ATCA');
-      else if (fmt == 'ATCI') throw new Error('Not supported: ATCI');
-      else if (pf.flags & C.DDPF_ALPHAPIXELS && pf.flags & C.DDPF_RGB) {
+      } else if (fmt == 'DXT1') {
+        offset = utex.readBC1(data, offset, img, w, h);
+      } else if (fmt == 'DXT3') {
+        offset = utex.readBC2(data, offset, img, w, h);
+      } else if (fmt == 'DXT5') {
+        offset = utex.readBC3(data, offset, img, w, h);
+      } else if (fmt == 'DX10') {
+        throw new Error('Not supported: BC7 (DX10)');
+      } else if (fmt == 'ATC ') {
+        throw new Error('Not supported: ATC');
+      } else if (fmt == 'ATCA') {
+        throw new Error('Not supported: ATCA');
+      } else if (fmt == 'ATCI') {
+        throw new Error('Not supported: ATCI');
+      } else if (pf.flags & C.DDPF_ALPHAPIXELS && pf.flags & C.DDPF_RGB) {
         if (bc == 32) {
-          for (var i = 0; i < img.length; i++) img[i] = data[offset + i];
+          for (var i = 0; i < img.length; i++) {
+            img[i] = data[offset + i];
+          }
+
           offset += img.length;
         } else if (bc == 16) {
           for (var i = 0; i < img.length; i += 4) {
@@ -59,13 +69,21 @@ export class UtexDDS {
             img[i + 2] = (255 * (clr & pf.BMask)) / pf.BMask;
             img[i + 3] = (255 * (clr & pf.AMask)) / pf.AMask;
           }
+
           offset += img.length >> 1;
-        } else throw 'unknown bit count ' + bc;
+        } else {
+          throw 'unknown bit count ' + bc;
+        }
       } else if (pf.flags & C.DDPF_ALPHA || pf.flags & C.DDPF_ALPHAPIXELS || pf.flags & C.DDPF_LUMINANCE) {
         if (bc == 8) {
-          for (var i = 0; i < img.length; i += 4) img[i + 3] = data[offset + (i >> 2)];
+          for (var i = 0; i < img.length; i += 4) {
+            img[i + 3] = data[offset + (i >> 2)];
+          }
+
           offset += img.length >> 2;
-        } else throw 'unknown bit count ' + bc;
+        } else {
+          throw 'unknown bit count ' + bc;
+        }
       } else {
         console.log(
           'unknown texture format, head flags: ',
@@ -75,10 +93,12 @@ export class UtexDDS {
         );
         throw 'e';
       }
+
       out.push({ width: w, height: h, image: img.buffer });
       w = w >> 1;
       h = h >> 1;
     }
+
     //console.log(Date.now()-time);  throw "e";
     return out; //out.slice(0,1);
   }
@@ -91,6 +111,7 @@ export class UtexDDS {
     for (var i = 3; i < imageAsByteArray.length; i += 4) {
       aAnd &= imageAsByteArray[i];
     }
+
     var gotAlpha = forceAlpha || aAnd < 250;
 
     var data = new Uint8Array(124 + w * h * 2),
@@ -107,11 +128,13 @@ export class UtexDDS {
       } else {
         offset = utex.writeBC1(imageAsByteArray, w, h, data, offset);
       }
+
       imageAsByteArray = utex.mipmapB(imageAsByteArray, w, h);
       w = w >> 1;
       h = h >> 1;
       mcnt++;
     }
+
     data[28] = mcnt;
 
     return data.buffer.slice(0, offset);
@@ -145,6 +168,7 @@ export class UtexDDS {
     hd.caps4 = utils.readUintLE(data, offset);
     offset += 4;
     offset += 4; // reserved, zeros
+
     return hd;
   }
 
@@ -197,6 +221,7 @@ export class UtexDDS {
     offset += 4;
     pf.AMask = utils.readUintLE(data, offset);
     offset += 4;
+
     return pf;
   }
 
