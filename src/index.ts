@@ -9,6 +9,7 @@ import { cachePurgeCommand } from './commands/cache-purge.js';
 import { bestConfigCommand } from './commands/best-config.js';
 import { vehicleStatsCommand } from './commands/vehicle-stats.js';
 import { charsCommand } from './commands/chars.js';
+import { renderCommand } from './commands/render.js';
 
 const app = new App();
 const program = new Command();
@@ -22,5 +23,6 @@ program.addCommand(cachePurgeCommand(app));
 program.addCommand(bestConfigCommand(app));
 program.addCommand(vehicleStatsCommand(app));
 program.addCommand(charsCommand(app));
+program.addCommand(renderCommand());
 
 await program.parseAsync();
