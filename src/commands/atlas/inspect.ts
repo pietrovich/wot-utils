@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { AtlasManager } from '../lib/atlas-manager.js';
+import { AtlasManager } from '~/lib/atlas-manager.js';
 
 export function inspectAtlasCommand(atlas: AtlasManager): Command {
   return new Command('inspect')

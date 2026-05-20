@@ -1,9 +1,9 @@
 import { writeFile, mkdir, access } from 'node:fs/promises';
 import { join, dirname, basename } from 'node:path';
-import { getAppId } from './lib/config.js';
-import { WGApiError } from './lib/api.js';
-import { getCached, setCached, purgeCache as purgeCacheLib } from './lib/cache.js';
-import type { Vehicle, VehiclesData, WGApiResponse, ModuleType, ModuleNode } from './types.js';
+import { getAppId } from '~/lib/config.js';
+import { WGApiError } from '~/lib/api.js';
+import { getCached, setCached, purgeCache as purgeCacheLib } from '~/lib/cache.js';
+import type { Vehicle, VehiclesData, WGApiResponse, ModuleType, ModuleNode } from '~/types.js';
 
 async function fileExists(path: string): Promise<boolean> {
   try {

@@ -2,7 +2,7 @@ import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
 import { join, basename, extname } from 'node:path';
 import { PNG } from 'pngjs';
 import { MaxRectsPacker, type IRectangle } from 'maxrects-packer';
-import { readTextureAtlas, type TextureRegion } from './texture-atlas.js';
+import { readTextureAtlas, type TextureRegion } from '~/lib/texture-atlas.js';
 
 export interface PackOptions {
   padding?: number;

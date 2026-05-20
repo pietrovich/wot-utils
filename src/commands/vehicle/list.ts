@@ -1,7 +1,7 @@
 import { Command } from 'commander';
-import { WGApiError } from '../lib/api.js';
-import { printJson, printVehiclesTable } from '../lib/format.js';
-import type { App } from '../app.js';
+import { WGApiError } from '~/lib/api.js';
+import { printJson, printVehiclesTable } from '~/lib/format.js';
+import type { App } from '~/app.js';
 
 export function listVehiclesCommand(app: App): Command {
   return new Command('list')

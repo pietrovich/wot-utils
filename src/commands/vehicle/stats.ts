@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { WGApiError } from '../lib/api.js';
-import type { App } from '../app.js';
+import { WGApiError } from '~/lib/api.js';
+import type { App } from '~/app.js';
 
 interface Armor {
   front: number;
