@@ -5,16 +5,19 @@ import type { App } from '../app.js';
 
 export function listVehiclesCommand(app: App): Command {
   return new Command('list-vehicles')
-    .description('List all vehicles from the WoT encyclopedia')
-    .option('--table', 'render output as a table')
+    .aliases(['v', 'vl', 'list'])
+    .description('List vehicles from the WoT encyclopedia')
+    .option('--all', 'show all vehicles (default: first 3)')
+    .option('--json', 'output as JSON')
     .action(async (options) => {
       try {
-        const data = await app.getVehicles();
+        const vehicles = await app.getVehicles();
+        const items = options.all ? vehicles : vehicles.slice(0, 3);
 
-        if (options.table) {
-          printVehiclesTable(data);
+        if (options.json) {
+          printJson(items);
         } else {
-          printJson(data);
+          printVehiclesTable(items);
         }
       } catch (error) {
         if (error instanceof WGApiError) {
