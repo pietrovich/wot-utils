@@ -1,8 +1,29 @@
 // noinspection ES6ConvertVarToLetConst,LanguageDetectionInspection,DuplicatedCode,OverlyComplexFunctionJS,SpellCheckingInspection,EqualityComparisonWithCoercionJS,JSDuplicatedDeclaration,PointlessArithmeticExpressionJS,FunctionTooLongJS
 /** eslint-disable */
-import * as C from './dd-constants.js';
 
 export class DDSUtils {
+  // ── DDS header flags ────────────────────────────────────────────────────────
+  static DDSD_CAPS        = 0x1;       // always required
+  static DDSD_HEIGHT      = 0x2;       // always required
+  static DDSD_WIDTH       = 0x4;       // always required
+  static DDSD_PITCH       = 0x8;
+  static DDSD_PIXELFORMAT = 0x1000;    // always required
+  static DDSD_MIPMAPCOUNT = 0x20000;
+  static DDSD_LINEARSIZE  = 0x80000;
+  static DDSD_DEPTH       = 0x800000;
+
+  // ── DDS pixel format flags ──────────────────────────────────────────────────
+  static DDPF_ALPHAPIXELS = 0x1;
+  static DDPF_ALPHA       = 0x2;
+  static DDPF_FOURCC      = 0x4;
+  static DDPF_RGB         = 0x40;
+  static DDPF_YUV         = 0x200;
+  static DDPF_LUMINANCE   = 0x20000;
+
+  // ── DDS caps flags ──────────────────────────────────────────────────────────
+  static DDSCAPS_COMPLEX  = 0x8;
+  static DDSCAPS_MIPMAP   = 0x400000;
+  static DDSCAPS_TEXTURE  = 0x1000;
   // Reusable scratch buffers — allocated once per instance to avoid per-call
   // heap pressure in tight decode/encode loops. WARNING: contents are not
   // cleared between calls; never hold a reference to these across method
@@ -20,7 +41,7 @@ export class DDSUtils {
     var head = this.readHeader(data, offset);
     offset += 124;
     var pf = head.pixFormat;
-    if (pf.flags & C.DDPF_FOURCC && pf.fourCC == 'DX10') {
+    if (pf.flags & DDSUtils.DDPF_FOURCC && pf.fourCC == 'DX10') {
       offset += 20;
     }
 
@@ -47,9 +68,9 @@ export class DDSUtils {
         throw new Error('Not supported: ATCA');
       } else if (fmt == 'ATCI') {
         throw new Error('Not supported: ATCI');
-      } else if (pf.flags & C.DDPF_ALPHAPIXELS && pf.flags & C.DDPF_RGB) {
+      } else if (pf.flags & DDSUtils.DDPF_ALPHAPIXELS && pf.flags & DDSUtils.DDPF_RGB) {
         throw new Error('Not supported: (complex-A)');
-      } else if (pf.flags & C.DDPF_ALPHA || pf.flags & C.DDPF_ALPHAPIXELS || pf.flags & C.DDPF_LUMINANCE) {
+      } else if (pf.flags & DDSUtils.DDPF_ALPHA || pf.flags & DDSUtils.DDPF_ALPHAPIXELS || pf.flags & DDSUtils.DDPF_LUMINANCE) {
         throw new Error('Not supported: (complex-B)');
       } else {
         console.log(
@@ -138,10 +159,10 @@ export class DDSUtils {
   }
 
   writeHeader(data, w, h, gotAlpha, offset) {
-    var flgs = C.DDSD_CAPS | C.DDSD_HEIGHT | C.DDSD_WIDTH | C.DDSD_PIXELFORMAT;
-    flgs |= C.DDSD_MIPMAPCOUNT | C.DDSD_LINEARSIZE;
+    var flgs = DDSUtils.DDSD_CAPS | DDSUtils.DDSD_HEIGHT | DDSUtils.DDSD_WIDTH | DDSUtils.DDSD_PIXELFORMAT;
+    flgs |= DDSUtils.DDSD_MIPMAPCOUNT | DDSUtils.DDSD_LINEARSIZE;
 
-    var caps = C.DDSCAPS_COMPLEX | C.DDSCAPS_MIPMAP | C.DDSCAPS_TEXTURE;
+    var caps = DDSUtils.DDSCAPS_COMPLEX | DDSUtils.DDSCAPS_MIPMAP | DDSUtils.DDSCAPS_TEXTURE;
     var pitch = ((w * h) >> 1) * (gotAlpha ? 2 : 1),
       depth = gotAlpha ? 1 : 0;
 
@@ -189,7 +210,7 @@ export class DDSUtils {
   }
 
   writePixFormat(data, gotAlpha, offset) {
-    var flgs = C.DDPF_FOURCC;
+    var flgs = DDSUtils.DDPF_FOURCC;
 
     this.writeUintLE(data, offset, 32);
     offset += 4;
