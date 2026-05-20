@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
-import { DDSUtils } from '../../src/lib/utex2/DDSUtils.js';
+import { DDSUtils } from '../../src/lib/utex-mod/DDSUtils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SAMPLE_DDS = resolve(__dirname, 'sample.dds');
