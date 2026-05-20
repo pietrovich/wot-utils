@@ -10,19 +10,15 @@ export class UtexDDS {
 
   decode(buff) {
     const utex = new Utex();
-    const utils = new UtexUtils();
     var data = new Uint8Array(buff),
-      offset = 0;
-    var mgck = utils.readASCII(data, offset, 4);
-    offset += 4;
+      offset = 4;
 
-    var head, pf, hdr10;
+    var head, pf;
 
     head = this.readHeader(data, offset);
     offset += 124;
     pf = head.pixFormat;
     if (pf.flags & C.DDPF_FOURCC && pf.fourCC == 'DX10') {
-      hdr10 = this.readHeader10(data, offset);
       offset += 20;
     }
     //console.log(head, pf);
@@ -30,8 +26,7 @@ export class UtexDDS {
     var w = head.width,
       h = head.height,
       out = [];
-    var fmt = pf.fourCC,
-      bc = pf.bitCount;
+    var fmt = pf.fourCC;
 
     //var time = Date.now();
     var mcnt = Math.max(1, head.mmcount);
@@ -55,35 +50,9 @@ export class UtexDDS {
       } else if (fmt == 'ATCI') {
         throw new Error('Not supported: ATCI');
       } else if (pf.flags & C.DDPF_ALPHAPIXELS && pf.flags & C.DDPF_RGB) {
-        if (bc == 32) {
-          for (var i = 0; i < img.length; i++) {
-            img[i] = data[offset + i];
-          }
-
-          offset += img.length;
-        } else if (bc == 16) {
-          for (var i = 0; i < img.length; i += 4) {
-            var clr = (data[offset + (i >> 1) + 1] << 8) | data[offset + (i >> 1)];
-            img[i + 0] = (255 * (clr & pf.RMask)) / pf.RMask;
-            img[i + 1] = (255 * (clr & pf.GMask)) / pf.GMask;
-            img[i + 2] = (255 * (clr & pf.BMask)) / pf.BMask;
-            img[i + 3] = (255 * (clr & pf.AMask)) / pf.AMask;
-          }
-
-          offset += img.length >> 1;
-        } else {
-          throw 'unknown bit count ' + bc;
-        }
+        throw new Error('Not supported: (complex-A)');
       } else if (pf.flags & C.DDPF_ALPHA || pf.flags & C.DDPF_ALPHAPIXELS || pf.flags & C.DDPF_LUMINANCE) {
-        if (bc == 8) {
-          for (var i = 0; i < img.length; i += 4) {
-            img[i + 3] = data[offset + (i >> 2)];
-          }
-
-          offset += img.length >> 2;
-        } else {
-          throw 'unknown bit count ' + bc;
-        }
+        throw new Error('Not supported: (complex-B)');
       } else {
         console.log(
           'unknown texture format, head flags: ',
@@ -236,24 +205,5 @@ export class UtexDDS {
     utils.writeASCII(data, offset, gotAlpha ? 'DXT5' : 'DXT1');
     offset += 4;
     offset += 5 * 4;
-  }
-
-  readHeader10(data, offset) {
-    const utils = new UtexUtils();
-    var hd = {},
-      rUi = utils.readUintLE;
-
-    hd.format = rUi(data, offset);
-    offset += 4;
-    hd.dimension = rUi(data, offset);
-    offset += 4;
-    hd.miscFlags = rUi(data, offset);
-    offset += 4;
-    hd.arraySize = rUi(data, offset);
-    offset += 4;
-    hd.miscFlags2 = rUi(data, offset);
-    offset += 4;
-
-    return hd;
   }
 }
