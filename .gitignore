@@ -11,3 +11,4 @@ notes/
 *.png
 samples/
 coverage/
+out/

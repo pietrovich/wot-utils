@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
-import type { App } from '~/app.js';
+import type { WGData } from '~/WGData.js';
 
 interface Armor {
   front: number;
@@ -68,7 +68,7 @@ function extractProfile(data: unknown): VehicleProfile {
   return Object.values(data as Record<string, VehicleProfile>)[0];
 }
 
-export function vehicleStatsCommand(app: App): Command {
+export function vehicleStatsCommand(app: WGData): Command {
   return new Command('stats')
     .description('Fetch stats for the best module configuration of a vehicle')
     .argument('[query]', 'tank_id (number), tag, or short_name')

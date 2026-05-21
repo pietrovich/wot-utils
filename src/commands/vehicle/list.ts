@@ -1,9 +1,10 @@
+
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
 import { printJson, printVehiclesTable } from '~/lib/format.js';
-import type { App } from '~/app.js';
+import type { WGData } from '~/WGData.js';
 
-export function listVehiclesCommand(app: App): Command {
+export function listVehiclesCommand(app: WGData): Command {
   return new Command('list')
     .description('List vehicles from the WoT encyclopedia')
     .option('--all', 'show all vehicles (default: first 3)')

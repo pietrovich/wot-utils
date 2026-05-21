@@ -41,10 +41,7 @@ describe('UtexUtils', () => {
     });
 
     it('reads sequential values at different offsets', () => {
-      const buf = new Uint8Array([
-        0x01, 0x00, 0x00, 0x00,
-        0x02, 0x00, 0x00, 0x00,
-      ]);
+      const buf = new Uint8Array([0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00]);
       expect(utils.readUintLE(buf, 0)).toBe(1);
       expect(utils.readUintLE(buf, 4)).toBe(2);
     });
@@ -88,16 +85,16 @@ describe('UtexUtils', () => {
     });
 
     it('writes at a non-zero offset without touching surrounding bytes', () => {
-      const buf = new Uint8Array([0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00, 0xBB, 0xBB]);
+      const buf = new Uint8Array([0xaa, 0xaa, 0x00, 0x00, 0x00, 0x00, 0xbb, 0xbb]);
       utils.writeUintLE(buf, 2, 42);
-      expect(buf[0]).toBe(0xAA);
-      expect(buf[1]).toBe(0xAA);
+      expect(buf[0]).toBe(0xaa);
+      expect(buf[1]).toBe(0xaa);
       expect(buf[2]).toBe(0x2a);
       expect(buf[3]).toBe(0x00);
       expect(buf[4]).toBe(0x00);
       expect(buf[5]).toBe(0x00);
-      expect(buf[6]).toBe(0xBB);
-      expect(buf[7]).toBe(0xBB);
+      expect(buf[6]).toBe(0xbb);
+      expect(buf[7]).toBe(0xbb);
     });
   });
 
@@ -160,21 +157,21 @@ describe('UtexUtils', () => {
     });
 
     it('writes at a non-zero offset without touching surrounding bytes', () => {
-      const buf = new Uint8Array([0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00, 0xBB, 0xBB]);
+      const buf = new Uint8Array([0xaa, 0xaa, 0x00, 0x00, 0x00, 0x00, 0xbb, 0xbb]);
       utils.writeASCII(buf, 2, 'DXT');
-      expect(buf[0]).toBe(0xAA);
-      expect(buf[1]).toBe(0xAA);
+      expect(buf[0]).toBe(0xaa);
+      expect(buf[1]).toBe(0xaa);
       expect(buf[2]).toBe(0x44); // D
       expect(buf[3]).toBe(0x58); // X
       expect(buf[4]).toBe(0x54); // T
-      expect(buf[6]).toBe(0xBB);
-      expect(buf[7]).toBe(0xBB);
+      expect(buf[6]).toBe(0xbb);
+      expect(buf[7]).toBe(0xbb);
     });
 
     it('writes an empty string without touching the buffer', () => {
-      const buf = new Uint8Array([0xAA, 0xBB]);
+      const buf = new Uint8Array([0xaa, 0xbb]);
       utils.writeASCII(buf, 0, '');
-      expect(Array.from(buf)).toEqual([0xAA, 0xBB]);
+      expect(Array.from(buf)).toEqual([0xaa, 0xbb]);
     });
   });
 

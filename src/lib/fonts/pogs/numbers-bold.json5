@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "height": 7,
+  "name": "pogs font numbers (bold)",
+  "glyphs": {
+    "0": [
+      "XXXXXX",
+      "XX  XX",
+      "XX  XX",
+      "XX  XX",
+      "XX  XX",
+      "XX  XX",
+      "XXXXXX"
+    ],
+    "1": [
+      " XX",
+      "XXX",
+      " XX",
+      " XX",
+      " XX",
+      " XX",
+      " XX"
+    ],
+    "2": [
+      "XXXXXX",
+      "    XX",
+      "    XX",
+      "XXXXXX",
+      "XX",
+      "XX",
+      "XXXXXX"
+    ],
+    "3": [
+      "XXXXXX",
+      "    XX",
+      "    XX",
+      "  XXXX",
+      "    XX",
+      "    XX",
+      "XXXXXX"
+    ],
+    "4": [
+      "X   XX",
+      "X   XX",
+      "X   XX",
+      "XXXXXX",
+      "    XX",
+      "    XX",
+      "    XX"
+    ],
+    "5": [
+      "XXXXXX",
+      "XX",
+      "XX",
+      "XXXXXX",
+      "    XX",
+      "    XX",
+      "XXXXXX"
+    ],
+    "6": [
+      " XXXX",
+      "XX",
+      "XX",
+      "XXXXXX",
+      "XX   X",
+      "XX   X",
+      "XXXXXX"
+    ],
+    "7": [
+      "XXXXXX",
+      "    XX",
+      "    XX",
+      "  XXXXX",
+      "    XX",
+      "    XX",
+      "    XX"
+    ],
+    "8": [
+      "XXXXXX",
+      "X   XX",
+      "X   XX",
+      "XXXXXX",
+      "XX   X",
+      "XX   X",
+      "XXXXXX"
+    ],
+    "9": [
+      "XXXXXX",
+      "X   XX",
+      "X   XX",
+      "XXXXXX",
+      "    XX",
+      "    XX",
+      "    XX"
+    ],
+    "?": [
+      " XXXX",
+      "X    X",
+      "     X",
+      "   XX",
+      "  X",
+      "",
+      "  X"
+    ]
+  }
+}

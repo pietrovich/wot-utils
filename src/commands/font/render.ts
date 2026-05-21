@@ -1,11 +1,9 @@
 import { Command } from 'commander';
-import { writeFile } from 'node:fs/promises';
-import { PixelFont } from '~/lib/pixel-font.js';
+import sharp from 'sharp';
 import { fonts } from '~/lib/fonts/index.js';
-import { encodePng } from '~/lib/png.js';
+import { renderText } from '~/lib/render-text.js';
 
 const DEFAULT_SAMPLE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const CHAR_GAP = 1;
 const PADDING = 2;
 
 export function renderCommand(): Command {
@@ -20,47 +18,38 @@ export function renderCommand(): Command {
         return;
       }
 
-      const fontDef = fonts[fontName];
-      if (!fontDef) {
+      if (!fonts[fontName]) {
         console.error(`Unknown font: ${fontName}. Available: ${Object.keys(fonts).join(', ')}`);
         process.exit(1);
       }
 
-      const pf = new PixelFont(fontDef);
-      const chars = [...text];
-      const charPixels = chars.map((ch) => pf.getPixels(ch));
-
-      const glyphH = Math.max(...charPixels.map((p) => p?.length ?? 0));
-      const charWidths = charPixels.map((p) => p?.[0]?.length ?? 0);
-      const totalW = PADDING * 2 + charWidths.reduce((s, w) => s + w, 0) + CHAR_GAP * (chars.length - 1);
-      const totalH = PADDING * 2 + glyphH;
+      const { data: textData, width: textW, height: textH } = renderText(fontName, text);
+      const totalW = PADDING * 2 + textW;
+      const totalH = PADDING * 2 + textH;
 
       // RGB buffer, filled white
       const buf = Buffer.alloc(totalW * totalH * 3, 0xff);
 
-      let x = PADDING;
-      for (let ci = 0; ci < chars.length; ci++) {
-        const pixels = charPixels[ci];
-        if (pixels) {
-          for (let row = 0; row < pixels.length; row++) {
-            const y = PADDING + row;
-            for (let col = 0; col < pixels[row].length; col++) {
-              const alpha = pixels[row][col]; // 0x00–0xFF from PixelFont
-              const grey = 255 - alpha; // composite over white
-              const off = (y * totalW + (x + col)) * 3;
-              buf[off] = grey;
-              buf[off + 1] = grey;
-              buf[off + 2] = grey;
-            }
+      // Composite dark text onto white canvas using alpha from rendered text
+      for (let row = 0; row < textH; row++) {
+        for (let col = 0; col < textW; col++) {
+          const alpha = textData[(row * textW + col) * 4 + 3];
+          if (alpha === 0) {
+            continue;
           }
-        }
 
-        x += charWidths[ci] + CHAR_GAP;
+          const grey = 255 - alpha;
+          const off = ((PADDING + row) * totalW + (PADDING + col)) * 3;
+          buf[off] = grey;
+          buf[off + 1] = grey;
+          buf[off + 2] = grey;
+        }
       }
 
-      const png = encodePng(totalW, totalH, buf);
       const outPath = `${fontName}.png`;
-      await writeFile(outPath, png);
-      console.log(`${outPath} — ${chars.length} chars, ${totalW}×${totalH}px`);
+      await sharp(buf, { raw: { width: totalW, height: totalH, channels: 3 } })
+        .png()
+        .toFile(outPath);
+      console.log(`${outPath} — ${[...text].length} chars, ${totalW}×${totalH}px`);
     });
 }

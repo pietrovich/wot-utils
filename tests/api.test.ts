@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WGApiError } from '../src/lib/api.js';
-import { App } from '../src/app.js';
+import { WGData } from '../src/WGData.js';
 
 vi.mock('../src/lib/cache.js', () => ({
   getCached: vi.fn().mockResolvedValue(null),
@@ -8,9 +8,9 @@ vi.mock('../src/lib/cache.js', () => ({
   purgeCache: vi.fn().mockResolvedValue(undefined),
 }));
 
-describe('App vehicle fetching', () => {
+describe('WGData vehicle fetching', () => {
   beforeEach(() => {
-    vi.stubEnv('WG_APP_ID', 'test-app-id');
+    vi.stubEnv('WG_APP_ID', 'test-WGData-id');
     vi.restoreAllMocks();
   });
 
@@ -25,7 +25,7 @@ describe('App vehicle fetching', () => {
       vi.fn().mockResolvedValue({ json: () => Promise.resolve({ status: 'ok', data: mockData }) }),
     );
 
-    const result = await new App().getVehicles();
+    const result = await new WGData().getVehicles();
     expect(result).toEqual([{ tank_id: 1, name: 'T-34', tier: 5 }]);
   });
 
@@ -41,8 +41,8 @@ describe('App vehicle fetching', () => {
       }),
     );
 
-    await expect(new App().getVehicles()).rejects.toThrow(WGApiError);
-    await expect(new App().getVehicles()).rejects.toThrow('INVALID_APPLICATION_ID');
+    await expect(new WGData().getVehicles()).rejects.toThrow(WGApiError);
+    await expect(new WGData().getVehicles()).rejects.toThrow('INVALID_APPLICATION_ID');
   });
 
   it('includes application_id in the request URL', async () => {
@@ -51,9 +51,9 @@ describe('App vehicle fetching', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    await new App().getVehicles();
+    await new WGData().getVehicles();
 
     const calledUrl: string = mockFetch.mock.calls[0][0];
-    expect(calledUrl).toContain('application_id=test-app-id');
+    expect(calledUrl).toContain('application_id=test-WGData-id');
   });
 });

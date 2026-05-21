@@ -1,9 +1,18 @@
-import { writeFile, mkdir, access } from 'node:fs/promises';
-import { join, dirname, basename } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { writeFile, access } from 'node:fs/promises';
+import { join, basename } from 'node:path';
+import sharp from 'sharp';
 import { getAppId } from '~/lib/config.js';
 import { WGApiError } from '~/lib/api.js';
 import { getCached, setCached, purgeCache as purgeCacheLib } from '~/lib/cache.js';
-import type { Vehicle, VehiclesData, WGApiResponse, ModuleType, ModuleNode } from '~/types.js';
+import type { Vehicle, VehiclesData, WGApiResponse, ModuleType, ModuleNode, VehicleIconSize } from '~/types.js';
+
+const IMAGE_KEY: Record<VehicleIconSize, keyof Vehicle['images']> = {
+  small: 'small_icon',
+  medium: 'contour_icon',
+  large: 'big_icon',
+  xs: 'contour_icon', // derived from medium — cropped locally, not fetched from WG
+};
 
 async function fileExists(path: string): Promise<boolean> {
   try {
@@ -25,14 +34,20 @@ async function downloadIcon(url: string, dest: string): Promise<void> {
   await writeFile(dest, buffer);
 }
 
-export class App {
+export class WGData {
   private readonly appId: string;
   private readonly limitOutput: number = 10000;
+  private readonly iconsBaseDir: string;
   private vehicles: VehiclesData | null = null;
 
   constructor() {
     this.appId = getAppId();
     this.limitOutput = process.env.LIMIT_OUTPUT ? Number(process.env.LIMIT_OUTPUT) : 3;
+    const cacheDir = process.env.WG_CACHE_DIR ?? '.data/cache';
+    this.iconsBaseDir = join(cacheDir, '..', 'icons');
+    for (const size of Object.keys(IMAGE_KEY) as VehicleIconSize[]) {
+      mkdirSync(join(this.iconsBaseDir, size), { recursive: true });
+    }
   }
 
   async getVehicles(): Promise<Vehicle[]> {
@@ -75,44 +90,69 @@ export class App {
     console.error(`Exported ${Object.keys(data).length} vehicles to ${outputPath}`);
   }
 
-  async fetchIcons({ force = false, concurrency = 10 }: { force?: boolean; concurrency?: number } = {}): Promise<void> {
-    const vehicles = await this.getVehicles();
+  async fetchVehicleIcon(
+    vehicle: Vehicle,
+    size: VehicleIconSize,
+    force = false,
+  ): Promise<{ skipped: boolean; downloaded: boolean; failed: boolean; path: string | null; error: string | null }> {
+    const url = vehicle.images?.[IMAGE_KEY[size]];
+    if (!url) {
+      return { skipped: true, downloaded: false, failed: false, path: null, error: null };
+    }
 
-    const cacheDir = process.env.WG_CACHE_DIR ?? '.data/cache';
-    const iconsDir = join(dirname(cacheDir), 'contour-icons');
-    await mkdir(iconsDir, { recursive: true });
+    const dest = join(this.iconsBaseDir, size, basename(url));
 
-    const all = vehicles;
+    if (!force && (await fileExists(dest))) {
+      return { skipped: true, downloaded: false, failed: false, path: dest, error: null };
+    }
+
+    try {
+      await downloadIcon(url, dest);
+
+      if (size === 'xs') {
+        const { data: trimmed, info } = await sharp(dest).trim().toBuffer({ resolveWithObject: true });
+        const SCALE_FACTOR = 0.8;
+        const scaled = await sharp(trimmed)
+          .resize(Math.round(info.width * SCALE_FACTOR), Math.round(info.height * SCALE_FACTOR))
+          .toBuffer();
+        await writeFile(dest, scaled);
+      }
+
+      return { skipped: false, downloaded: true, failed: false, path: dest, error: null };
+    } catch (err) {
+      return { skipped: false, downloaded: false, failed: true, path: null, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  async getDefaultVehicleIcon(vehicle: Vehicle, size: VehicleIconSize): Promise<{ data: Buffer; info: sharp.OutputInfo } | null> {
+    const result = await this.fetchVehicleIcon(vehicle, size, false);
+    if (!result.path) {
+      return null;
+    }
+
+    return sharp(result.path).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  }
+
+  async fetchIcons({ force = false, concurrency = 10, size, query }: { force?: boolean; concurrency?: number; size: VehicleIconSize; query?: string }): Promise<void> {
+    const vehicles = query ? [await this.findVehicle(query)] : await this.getVehicles();
     let downloaded = 0;
     let skipped = 0;
     let failed = 0;
 
-    for (let i = 0; i < all.length; i += concurrency) {
-      const batch = all.slice(i, i + concurrency);
+    for (let i = 0; i < vehicles.length; i += concurrency) {
+      const batch = vehicles.slice(i, i + concurrency);
       await Promise.all(
         batch.map(async (vehicle) => {
-          const url = vehicle.images?.contour_icon;
-          if (!url) {
-            skipped++;
-
-            return;
-          }
-
-          const dest = join(iconsDir, basename(url));
-
-          if (!force && (await fileExists(dest))) {
-            skipped++;
-
-            return;
-          }
-
-          try {
-            await downloadIcon(url, dest);
+          const result = await this.fetchVehicleIcon(vehicle, size, force);
+          const name = vehicle.images?.[IMAGE_KEY[size]] ? basename(vehicle.images[IMAGE_KEY[size]]) : vehicle.tag;
+          if (result.downloaded) {
             downloaded++;
-            console.error(`↓ ${basename(url)}`);
-          } catch (err) {
+            console.error(`↓ ${name}`);
+          } else if (result.failed) {
             failed++;
-            console.error(`✗ ${basename(url)}: ${err instanceof Error ? err.message : err}`);
+            console.error(`✗ ${name}: ${result.error}`);
+          } else {
+            skipped++;
           }
         }),
       );

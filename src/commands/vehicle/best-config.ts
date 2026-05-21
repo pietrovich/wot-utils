@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
-import type { App } from '~/app.js';
+import type { WGData } from '~/WGData.js';
 
-export function bestConfigCommand(app: App): Command {
+export function bestConfigCommand(app: WGData): Command {
   return new Command('best-config')
     .description('Infer best module configuration for a vehicle')
     .argument('<query>', 'tank_id (number), tag, or short_name')

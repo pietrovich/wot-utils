@@ -1,17 +1,25 @@
 import { join } from 'node:path';
 import { Command } from 'commander';
-import sharp from 'sharp';
-import { BackgroundFactory } from '~/lib/icons/background-factory.js';
+import { bgColors } from '~/lib/icons/pogs/background-colors.js';
+import { PogsConstants } from '~/lib/icons/pogs/pogs-constants.js';
+import { ImageBaker } from '~/lib/icons/ImageBaker.js';
+import { gradientBackground } from '~/lib/icons/layers/gradient-background.js';
+import { barAndShield } from '~/lib/icons/layers/bar-and-shield.js';
+import type { Vehicle } from '~/types.js';
 
 export function dumpBackgroundCommand(): Command {
   return new Command('dump-background')
     .description('Write a composited tank-type icon background (gradient + shield) for each type to cwd')
     .action(async () => {
-      const factory = new BackgroundFactory();
-      for (const type of BackgroundFactory.types()) {
-        const { data, info } = await factory.generate(type);
+      const baker = new ImageBaker(PogsConstants.width, PogsConstants.height, [
+        gradientBackground(),
+        barAndShield(),
+      ]);
+
+      for (const type of Object.keys(bgColors)) {
+        const stub = { type } as unknown as Vehicle;
         const outPath = join(process.cwd(), `${type.toLowerCase()}.png`);
-        await sharp(data, { raw: info }).png().toFile(outPath);
+        await (await baker.bake(stub)).png().toFile(outPath);
         console.log(`Written ${outPath}`);
       }
     });
