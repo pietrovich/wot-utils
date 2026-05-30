@@ -7,12 +7,13 @@ import type { WGData } from '~/WGData.js';
 import { ImageBaker } from '~/lib/icons/ImageBaker.js';
 import { PogsConstants } from '~/lib/icons/pogs/pogs-constants.js';
 import { gradientBackground } from '~/lib/icons/layers/gradient-background.js';
+import { preRenderedBackground } from '~/lib/icons/layers/pre-rendered-background.js';
 import { barAndShield } from '~/lib/icons/layers/bar-and-shield.js';
 import { vehicleIcon } from '~/lib/icons/layers/vehicle-icon.js';
 import { tierText } from '~/lib/icons/layers/tier-text.js';
 import { nameText } from '~/lib/icons/layers/name-text.js';
 
-type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean };
+type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean; bg?: string; preRenderedBg?: string };
 
 const CONCURRENCY = 5;
 
@@ -30,6 +31,8 @@ export function iconRenderCommand(app: WGData): Command {
     .argument('[query]', 'tank_id (number), tag, or short_name')
     .option('--all', 'render all vehicles')
     .option('--color', 'use color variant (gradient background)')
+    .option('--bg <version>', 'use pre-rendered background at given version')
+    .option('--pre-rendered-bg <version>', 'alias for --bg')
     .option('--to <dir>', 'output directory (default: current working directory)')
     .option('--create', 'create output directory if it does not exist')
     .action(async (query: string | undefined, options: Options) => {
@@ -50,9 +53,18 @@ export function iconRenderCommand(app: WGData): Command {
           mkdirSync(outDir, { recursive: true });
         }
 
-        const layers = options.color
-          ? [gradientBackground(), barAndShield(), vehicleIcon(app), tierText(), nameText()]
-          : [barAndShield(), vehicleIcon(app), tierText(), nameText()];
+        const bgVersion = options.bg ?? options.preRenderedBg;
+        let layers;
+
+        if (bgVersion !== undefined) {
+          const version = parseInt(bgVersion.replace(/\D+/g, ''), 10);
+          const flavor = options.color ? '' : 'clear';
+          layers = [preRenderedBackground(version, flavor), vehicleIcon(app), tierText(), nameText()];
+        } else {
+          layers = options.color
+            ? [gradientBackground(), barAndShield(), vehicleIcon(app), tierText(), nameText()]
+            : [barAndShield(), vehicleIcon(app), tierText(), nameText()];
+        }
 
         const vehicles: Vehicle[] = options.all
           ? await app.getVehicles()
