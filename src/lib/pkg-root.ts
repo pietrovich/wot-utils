@@ -7,5 +7,6 @@ export function findPkgRoot(url: URL): string {
   while (!existsSync(resolve(d, 'package.json'))) {
     d = dirname(d);
   }
+
   return d;
 }

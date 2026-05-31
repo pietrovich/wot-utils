@@ -20,9 +20,12 @@ import { AtlasManager } from '~/lib/atlas-manager.js';
 import { ddsDecodeCommand } from '~/commands/dds/decode.js';
 import { ddsEncodeCommand } from '~/commands/dds/encode.js';
 import { dumpBackgroundCommand } from '~/commands/icon/dump-background.js';
+import { TomatoApi } from '~/lib/tomato-api.js';
+import { tomatoFetchCommand } from '~/commands/tomato/fetch.js';
 
 const app = new App();
 const atlasManager = new AtlasManager();
+const tomatoApi = new TomatoApi();
 const program = new Command();
 
 program.name('pie-wot').description('CLI utilities for World of Tanks data and assets').version('0.1.0');
@@ -60,5 +63,9 @@ program.addCommand(dds);
 const icon = new Command('icon').description('Vehicle icon generation tools');
 icon.addCommand(dumpBackgroundCommand());
 program.addCommand(icon);
+
+const tomato = new Command('tomato').description('Tomato.gg data fetcher');
+tomato.addCommand(tomatoFetchCommand(app, tomatoApi));
+program.addCommand(tomato);
 
 await program.parseAsync();
