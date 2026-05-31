@@ -231,7 +231,7 @@ export class App {
     await purgeCacheLib();
   }
 
-  private async findVehicle(query: number | string): Promise<Vehicle> {
+  async findVehicle(query: number | string): Promise<Vehicle> {
     const vehicles = await this.getVehicles();
     const q = String(query);
     const isId = /^\d+$/.test(q);
