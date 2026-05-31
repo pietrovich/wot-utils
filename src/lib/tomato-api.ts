@@ -23,6 +23,8 @@ class HttpError extends Error {
 }
 
 export class TomatoApi {
+  private readonly BACKOFF_INTERVAL = 65 * 1000;
+
   private readonly dataDir: string;
   private readonly apiKey: string;
   private readonly rateLimit: number;
@@ -149,7 +151,8 @@ export class TomatoApi {
           await task();
         } catch (err) {
           if (err instanceof HttpError && err.status !== 404) {
-            this.lastRequestAt += 5_000;
+            this.lastRequestAt += this.BACKOFF_INTERVAL;
+            console.log(`Looks like rate/limit wall hit. Backing of for ${this.BACKOFF_INTERVAL / 1000} sec`);
           }
         }
       }
