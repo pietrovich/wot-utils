@@ -15,7 +15,7 @@ export class TomatoApi {
   private draining = false;
   private readonly queue: Array<() => Promise<void>> = [];
 
-  constructor(dataDir = './tomato', apiKey = '', rateLimit = 4) {
+  constructor(dataDir = './tomato', apiKey = '', rateLimit = 60) {
     this.dataDir = resolve(findPkgRoot(new URL(import.meta.url)), dataDir);
     this.apiKey = apiKey || process.env.TOMATO_API_KEY || '';
     this.rateLimit = rateLimit;
@@ -81,6 +81,7 @@ export class TomatoApi {
   private async request(url: string): Promise<unknown> {
     const response = await fetch(url, {
       headers: { 'x-api-key': this.apiKey },
+      signal: AbortSignal.timeout(10_000),
     });
     await this.logRequest(url, response.status);
     if (!response.ok) {
