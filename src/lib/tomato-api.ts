@@ -87,6 +87,7 @@ export class TomatoApi {
       resolve({ vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data });
     } catch (err) {
       resolve({ vehicleId, fileName: filename, success: false, elapsed: Date.now() - t0, data: undefined, error: err instanceof Error ? err : new Error(String(err)) });
+      throw err;
     }
   }
 
@@ -99,6 +100,7 @@ export class TomatoApi {
       resolve({ vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data });
     } catch (err) {
       resolve({ vehicleId, fileName: filename, success: false, elapsed: Date.now() - t0, data: undefined, error: err instanceof Error ? err : new Error(String(err)) });
+      throw err;
     }
   }
 
@@ -115,6 +117,7 @@ export class TomatoApi {
       }
 
       resolve({ vehicleId, fileName: filename, success: false, elapsed: Date.now() - t0, data: undefined, error: err instanceof Error ? err : new Error(String(err)) });
+      throw err;
     }
   }
 
@@ -142,7 +145,13 @@ export class TomatoApi {
         await this.waitForRateLimit();
         this.lastRequestAt = Date.now();
         const task = this.queue.shift()!;
-        await task();
+        try {
+          await task();
+        } catch (err) {
+          if (err instanceof HttpError && err.status !== 404) {
+            this.lastRequestAt += 5_000;
+          }
+        }
       }
     } finally {
       this.draining = false;
