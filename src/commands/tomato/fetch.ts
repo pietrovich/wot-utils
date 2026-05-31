@@ -1,36 +1,45 @@
 import { Command } from 'commander';
 import type { App } from '~/app.js';
-import type { TomatoApi } from '~/lib/tomato-api.js';
+import type { FetchResult, TomatoApi } from '~/lib/tomato-api.js';
 import { fromTypeAlias } from '~/lib/vehicle-type-helpers.js';
 import type { Vehicle, VehicleType } from '~/types.js';
 
 const TYPE_ALIASES = ['lt', 'mt', 'ht', 'td', 'at'] as const;
 type TypeAlias = (typeof TYPE_ALIASES)[number];
 
-async function fetchVehicle(tomato: TomatoApi, vehicle: Vehicle): Promise<{ succeeded: number; failed: number }> {
-  const results = await Promise.allSettled([
+async function fetchVehicle(tomato: TomatoApi, vehicle: Vehicle): Promise<FetchResult[]> {
+  return Promise.all([
     tomato.fetchVehicleVisuals(vehicle.tank_id),
     tomato.fetchVehicleLoadouts(vehicle.tank_id),
     tomato.fetchVehicleProLoadouts(vehicle.tank_id),
   ]);
-
-  for (const result of results) {
-    if (result.status === 'rejected') {
-      console.error(`  error: ${result.reason instanceof Error ? result.reason.message : result.reason}`);
-    }
-  }
-
-  return {
-    succeeded: results.filter((r) => r.status === 'fulfilled').length,
-    failed: results.filter((r) => r.status === 'rejected').length,
-  };
 }
 
-function printSummary(totalRequests: number, succeeded: number, failed: number): void {
+function vehicleLine(results: FetchResult[], vehicle: Vehicle, prefix = ''): string {
+  const succeeded = results.filter((r) => r.success).length;
+  const failed = results.filter((r) => !r.success).length;
+  const elapsed = results.reduce((sum, r) => sum + r.elapsed, 0);
+  const status = failed === 0
+    ? 'OK'
+    : (succeeded === 0 ? 'FAILED' : 'PARTIAL');
+
+  return `${prefix}${vehicle.short_name} (${vehicle.tank_id}): ${status} (${succeeded}/${failed}) ${elapsed}ms`;
+}
+
+function printErrors(results: FetchResult[]): void {
+  for (const r of results) {
+    if (!r.success) {
+      console.error(`    error [${r.fileName}]: ${r.error?.message ?? 'unknown'}`);
+    }
+  }
+}
+
+function printSummary(succeeded: number, failed: number): void {
+  const total = succeeded + failed;
   const summary =
     failed === 0
-      ? `${totalRequests} requests, ${succeeded} succeeded`
-      : `${totalRequests} requests, ${succeeded} succeeded, ${failed} failed`;
+      ? `${total} requests, ${succeeded} succeeded`
+      : `${total} requests, ${succeeded} succeeded, ${failed} failed`;
   console.log(summary);
 }
 
@@ -49,8 +58,11 @@ export function tomatoFetchCommand(app: App, tomato: TomatoApi): Command {
         if (query) {
           const vehicle = await app.findVehicle(query);
           console.error(`Fetching data for ${vehicle.short_name} (${vehicle.tank_id})…`);
-          const { succeeded, failed } = await fetchVehicle(tomato, vehicle);
-          printSummary(succeeded + failed, succeeded, failed);
+          const results = await fetchVehicle(tomato, vehicle);
+          printErrors(results);
+          console.error(vehicleLine(results, vehicle));
+          const failed = results.filter((r) => !r.success).length;
+          printSummary(results.length - failed, failed);
           if (failed > 0) {process.exit(1);}
 
           return;
@@ -82,15 +94,17 @@ export function tomatoFetchCommand(app: App, tomato: TomatoApi): Command {
 
         for (const vehicle of targets) {
           idx++;
-          const { succeeded, failed } = await fetchVehicle(tomato, vehicle);
+          const results = await fetchVehicle(tomato, vehicle);
+          const succeeded = results.filter((r) => r.success).length;
+          const failed = results.filter((r) => !r.success).length;
           totalSucceeded += succeeded;
           totalFailed += failed;
-          const status = failed === 0 ? 'ok' : `${failed} failed`;
-          const progress = `${String(idx).padStart(width)}/${total}`;
-          console.error(`  ${progress} ${vehicle.short_name} (${vehicle.tank_id}): ${status}`);
+          const progress = `${String(idx).padStart(width)}/${total} `;
+          console.error(vehicleLine(results, vehicle, `  ${progress}`));
+          printErrors(results);
         }
 
-        printSummary(totalSucceeded + totalFailed, totalSucceeded, totalFailed);
+        printSummary(totalSucceeded, totalFailed);
         if (totalFailed > 0) {process.exit(1);}
       } catch (error) {
         console.error('Error:', error instanceof Error ? error.message : error);

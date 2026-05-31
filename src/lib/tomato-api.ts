@@ -2,8 +2,16 @@ import { appendFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { findPkgRoot } from '~/lib/pkg-root.js';
 
-type Resolve<T> = (value: T) => void;
-type Reject = (reason: unknown) => void;
+export interface FetchResult {
+  vehicleId: number;
+  fileName: string;
+  success: boolean;
+  elapsed: number;
+  data: unknown;
+  error?: Error;
+}
+
+type FetchResolve = (result: FetchResult) => void;
 
 class HttpError extends Error {
   constructor(
@@ -31,91 +39,82 @@ export class TomatoApi {
     this.logPath = join(this.dataDir, 'requests.log');
   }
 
-  async fetchVehicleVisuals(vehicleId: number, forceUpdate = false): Promise<unknown> {
+  async fetchVehicleVisuals(vehicleId: number, forceUpdate = false): Promise<FetchResult> {
     const filename = 'index.json';
+    const t0 = Date.now();
     if (!forceUpdate && (await this.hasData(vehicleId, filename))) {
-      return this.loadData(vehicleId, filename);
+      return { vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data: await this.loadData(vehicleId, filename) };
     }
 
-    return new Promise<unknown>((resolve, reject) => {
-      this.queue.push(() => this.runVehicleVisuals(vehicleId, filename, resolve, reject));
+    return new Promise<FetchResult>((resolve) => {
+      this.queue.push(() => this.runVehicleVisuals(vehicleId, filename, resolve));
       void this.drain();
     });
   }
 
-  async fetchVehicleLoadouts(vehicleId: number, forceUpdate = false): Promise<unknown> {
+  async fetchVehicleLoadouts(vehicleId: number, forceUpdate = false): Promise<FetchResult> {
     const filename = 'loadouts.json';
+    const t0 = Date.now();
     if (!forceUpdate && (await this.hasData(vehicleId, filename))) {
-      return this.loadData(vehicleId, filename);
+      return { vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data: await this.loadData(vehicleId, filename) };
     }
 
-    return new Promise<unknown>((resolve, reject) => {
-      this.queue.push(() => this.runVehicleLoadouts(vehicleId, filename, resolve, reject));
+    return new Promise<FetchResult>((resolve) => {
+      this.queue.push(() => this.runVehicleLoadouts(vehicleId, filename, resolve));
       void this.drain();
     });
   }
 
-  async fetchVehicleProLoadouts(vehicleId: number, forceUpdate = false): Promise<unknown> {
+  async fetchVehicleProLoadouts(vehicleId: number, forceUpdate = false): Promise<FetchResult> {
     const filename = 'pro-loadouts.json';
+    const t0 = Date.now();
     if (!forceUpdate && (await this.hasData(vehicleId, filename))) {
-      return this.loadData(vehicleId, filename);
+      return { vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data: await this.loadData(vehicleId, filename) };
     }
 
-    return new Promise<unknown>((resolve, reject) => {
-      this.queue.push(() => this.runVehicleProLoadouts(vehicleId, filename, resolve, reject));
+    return new Promise<FetchResult>((resolve) => {
+      this.queue.push(() => this.runVehicleProLoadouts(vehicleId, filename, resolve));
       void this.drain();
     });
   }
 
-  private async runVehicleVisuals(
-    vehicleId: number,
-    filename: string,
-    resolve: Resolve<unknown>,
-    reject: Reject,
-  ): Promise<void> {
+  private async runVehicleVisuals(vehicleId: number, filename: string, resolve: FetchResolve): Promise<void> {
+    const t0 = Date.now();
     const url = `https://tomato.gg/wot/vehicles/visuals/${vehicleId}.json`;
     try {
       const data = await this.request(url);
       await this.saveResponse(vehicleId, filename, data);
-      resolve(data);
+      resolve({ vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data });
     } catch (err) {
-      reject(err);
+      resolve({ vehicleId, fileName: filename, success: false, elapsed: Date.now() - t0, data: undefined, error: err instanceof Error ? err : new Error(String(err)) });
     }
   }
 
-  private async runVehicleLoadouts(
-    vehicleId: number,
-    filename: string,
-    resolve: Resolve<unknown>,
-    reject: Reject,
-  ): Promise<void> {
+  private async runVehicleLoadouts(vehicleId: number, filename: string, resolve: FetchResolve): Promise<void> {
+    const t0 = Date.now();
     const url = `https://api.tomato.gg/api/tank/loadout-performance/${vehicleId}?cache=true`;
     try {
       const data = await this.request(url);
       await this.saveResponse(vehicleId, filename, data);
-      resolve(data);
+      resolve({ vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data });
     } catch (err) {
-      reject(err);
+      resolve({ vehicleId, fileName: filename, success: false, elapsed: Date.now() - t0, data: undefined, error: err instanceof Error ? err : new Error(String(err)) });
     }
   }
 
-  private async runVehicleProLoadouts(
-    vehicleId: number,
-    filename: string,
-    resolve: Resolve<unknown>,
-    reject: Reject,
-  ): Promise<void> {
+  private async runVehicleProLoadouts(vehicleId: number, filename: string, resolve: FetchResolve): Promise<void> {
+    const t0 = Date.now();
     const url = `https://api.tomato.gg/api/tank/top-loadouts/${vehicleId}?cache=true`;
     try {
       const data = await this.request(url);
       await this.saveResponse(vehicleId, filename, data);
-      resolve(data);
+      resolve({ vehicleId, fileName: filename, success: true, elapsed: Date.now() - t0, data });
     } catch (err) {
       if (err instanceof HttpError && err.status === 404) {
         await this.saveResponse(vehicleId, filename, null);
       }
 
-      reject(err);
+      resolve({ vehicleId, fileName: filename, success: false, elapsed: Date.now() - t0, data: undefined, error: err instanceof Error ? err : new Error(String(err)) });
     }
   }
 
