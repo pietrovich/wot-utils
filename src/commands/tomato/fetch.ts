@@ -11,6 +11,7 @@ async function fetchVehicle(tomato: TomatoApi, vehicle: Vehicle): Promise<{ succ
   const results = await Promise.allSettled([
     tomato.fetchVehicleVisuals(vehicle.tank_id),
     tomato.fetchVehicleLoadouts(vehicle.tank_id),
+    tomato.fetchVehicleProLoadouts(vehicle.tank_id),
   ]);
 
   for (const result of results) {
@@ -49,7 +50,7 @@ export function tomatoFetchCommand(app: App, tomato: TomatoApi): Command {
           const vehicle = await app.findVehicle(query);
           console.error(`Fetching data for ${vehicle.short_name} (${vehicle.tank_id})…`);
           const { succeeded, failed } = await fetchVehicle(tomato, vehicle);
-          printSummary(2, succeeded, failed);
+          printSummary(succeeded + failed, succeeded, failed);
           if (failed > 0) {process.exit(1);}
 
           return;
@@ -75,16 +76,21 @@ export function tomatoFetchCommand(app: App, tomato: TomatoApi): Command {
 
         let totalSucceeded = 0;
         let totalFailed = 0;
+        const total = targets.length;
+        const width = String(total).length;
+        let idx = 0;
 
         for (const vehicle of targets) {
+          idx++;
           const { succeeded, failed } = await fetchVehicle(tomato, vehicle);
           totalSucceeded += succeeded;
           totalFailed += failed;
           const status = failed === 0 ? 'ok' : `${failed} failed`;
-          console.error(`  ${vehicle.short_name} (${vehicle.tank_id}): ${status}`);
+          const progress = `${String(idx).padStart(width)}/${total}`;
+          console.error(`  ${progress} ${vehicle.short_name} (${vehicle.tank_id}): ${status}`);
         }
 
-        printSummary(targets.length * 2, totalSucceeded, totalFailed);
+        printSummary(totalSucceeded + totalFailed, totalSucceeded, totalFailed);
         if (totalFailed > 0) {process.exit(1);}
       } catch (error) {
         console.error('Error:', error instanceof Error ? error.message : error);

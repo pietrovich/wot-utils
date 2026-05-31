@@ -5,6 +5,15 @@ import { findPkgRoot } from '~/lib/pkg-root.js';
 type Resolve<T> = (value: T) => void;
 type Reject = (reason: unknown) => void;
 
+class HttpError extends Error {
+  constructor(
+    readonly status: number,
+    url: string,
+  ) {
+    super(`HTTP ${status} for ${url}`);
+  }
+}
+
 export class TomatoApi {
   private readonly dataDir: string;
   private readonly apiKey: string;
@@ -15,7 +24,7 @@ export class TomatoApi {
   private draining = false;
   private readonly queue: Array<() => Promise<void>> = [];
 
-  constructor(dataDir = './tomato', apiKey = '', rateLimit = 60) {
+  constructor(dataDir = './tomato/data', apiKey = '', rateLimit = 30) {
     this.dataDir = resolve(findPkgRoot(new URL(import.meta.url)), dataDir);
     this.apiKey = apiKey || process.env.TOMATO_API_KEY || '';
     this.rateLimit = rateLimit;
@@ -42,6 +51,18 @@ export class TomatoApi {
 
     return new Promise<unknown>((resolve, reject) => {
       this.queue.push(() => this.runVehicleLoadouts(vehicleId, filename, resolve, reject));
+      void this.drain();
+    });
+  }
+
+  async fetchVehicleProLoadouts(vehicleId: number, forceUpdate = false): Promise<unknown> {
+    const filename = 'pro-loadouts.json';
+    if (!forceUpdate && (await this.hasData(vehicleId, filename))) {
+      return this.loadData(vehicleId, filename);
+    }
+
+    return new Promise<unknown>((resolve, reject) => {
+      this.queue.push(() => this.runVehicleProLoadouts(vehicleId, filename, resolve, reject));
       void this.drain();
     });
   }
@@ -78,6 +99,26 @@ export class TomatoApi {
     }
   }
 
+  private async runVehicleProLoadouts(
+    vehicleId: number,
+    filename: string,
+    resolve: Resolve<unknown>,
+    reject: Reject,
+  ): Promise<void> {
+    const url = `https://api.tomato.gg/api/tank/top-loadouts/${vehicleId}?cache=true`;
+    try {
+      const data = await this.request(url);
+      await this.saveResponse(vehicleId, filename, data);
+      resolve(data);
+    } catch (err) {
+      if (err instanceof HttpError && err.status === 404) {
+        await this.saveResponse(vehicleId, filename, null);
+      }
+
+      reject(err);
+    }
+  }
+
   private async request(url: string): Promise<unknown> {
     const response = await fetch(url, {
       headers: { 'x-api-key': this.apiKey },
@@ -85,7 +126,7 @@ export class TomatoApi {
     });
     await this.logRequest(url, response.status);
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status} for ${url}`);
+      throw new HttpError(response.status, url);
     }
 
     return response.json();
