@@ -115,28 +115,40 @@ describe('createAligner', () => {
       expect(aligner({ width: 1, height: 1 })).toEqual({ left: 40, top: 12, width: 1, height: 1 });
     });
 
-    it('floor(c) explicit on odd box', () => {
+    it('(c).- explicit floor on odd box', () => {
       const oddBox = { width: 81, height: 25 };
-      const aligner = createAligner(oddBox, 'tl', ['floor(c)', 'floor(c)']);
+      const aligner = createAligner(oddBox, 'tl', ['(c).-', '(c).-']);
       expect(aligner({ width: 1, height: 1 })).toEqual({ left: 40, top: 12, width: 1, height: 1 });
     });
 
-    it('ceil(c) on odd box', () => {
+    it('c.- bare dim ref with floor suffix on odd box', () => {
       const oddBox = { width: 81, height: 25 };
-      const aligner = createAligner(oddBox, 'tl', ['ceil(c)', 'ceil(c)']);
+      const aligner = createAligner(oddBox, 'tl', ['c.-', 'c.-']);
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 40, top: 12, width: 1, height: 1 });
+    });
+
+    it('(c).+ ceil on odd box', () => {
+      const oddBox = { width: 81, height: 25 };
+      const aligner = createAligner(oddBox, 'tl', ['(c).+', '(c).+']);
       // ceil(81/2)=41, ceil(25/2)=13
       expect(aligner({ width: 1, height: 1 })).toEqual({ left: 41, top: 13, width: 1, height: 1 });
     });
 
-    it('floor(r / 3) on 80-wide box', () => {
-      const aligner = createAligner(box, 'tl', ['floor(r / 3)', 5]);
-      // floor(80/3)=floor(26.67)=26
+    it('c.+ bare dim ref with ceil suffix on odd box', () => {
+      const oddBox = { width: 81, height: 25 };
+      const aligner = createAligner(oddBox, 'tl', ['c.+', 'c.+']);
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 41, top: 13, width: 1, height: 1 });
+    });
+
+    it('(r / 3).- floor on 80-wide box', () => {
+      const aligner = createAligner(box, 'tl', ['(r / 3).-', 5]);
+      // floor(80/3)=26
       expect(aligner({ width: 1, height: 1 })).toEqual({ left: 26, top: 5, width: 1, height: 1 });
     });
 
-    it('ceil(r / 3) on 80-wide box', () => {
-      const aligner = createAligner(box, 'tl', ['ceil(r / 3)', 5]);
-      // ceil(80/3)=ceil(26.67)=27
+    it('(r / 3).+ ceil on 80-wide box', () => {
+      const aligner = createAligner(box, 'tl', ['(r / 3).+', 5]);
+      // ceil(80/3)=27
       expect(aligner({ width: 1, height: 1 })).toEqual({ left: 27, top: 5, width: 1, height: 1 });
     });
 

@@ -40,6 +40,7 @@ function applySuffixRound(suffix: string | undefined, n: number): number {
 
 export function resolveOffset(alias: AnchorAlias, w: number, h: number): [number, number] {
   const [fx, fy] = OFFSETS[ALIASES[alias]];
+
   return [fx * w, fy * h];
 }
 
@@ -49,6 +50,7 @@ export function resolveAnchorWithRound(alias: AnchorAliasWithRound, w: number, h
   const pureAlias = (hasSuffix ? alias.slice(0, -2) : alias) as AnchorAlias;
   const suffix = hasSuffix ? last2 : undefined;
   const [rx, ry] = resolveOffset(pureAlias, w, h);
+
   return [applySuffixRound(suffix, rx), applySuffixRound(suffix, ry)];
 }
 
@@ -59,14 +61,17 @@ type InnerExpr = DimRef | `${DimRef} ${'+'|'-'|'/'} ${number}`;
 export type AxisExpr =
   | number
   | InnerExpr
-  | `floor(${InnerExpr})`
-  | `ceil(${InnerExpr})`
+  | `${DimRef}${RoundSuffix}`
+  | `(${InnerExpr})${RoundSuffix}`
   | (string & {});
 
 function resolveDimRef(dim: string, bw: number, bh: number, axis: 'x' | 'y'): number {
   if (dim === 't' || dim === 'l') { return 0; }
+
   if (dim === 'c') { return axis === 'x' ? bw / 2 : bh / 2; }
+
   if (dim === 'r' || dim === 'w' || dim === 'bw') { return bw; }
+
   return bh; // b, h, bh
 }
 
@@ -75,22 +80,32 @@ const INNER_RE = /^(t|l|c|r|b|w|bw|h|bh)(?:\s*([+\-\/])\s*(\d+(?:\.\d+)?))?$/;
 function resolveInner(expr: string, bw: number, bh: number, axis: 'x' | 'y'): number {
   const match = INNER_RE.exec(expr.trim());
   if (!match) { throw new Error(`Invalid axis expression: "${expr}"`); }
+
   const [, dim, op, numStr] = match;
   const base = resolveDimRef(dim, bw, bh, axis);
   if (!op) { return base; }
+
   const n = Number(numStr);
   if (op === '+') { return base + n; }
+
   if (op === '-') { return base - n; }
+
   return base / n;
 }
 
 export function resolveAxisExpr(expr: AxisExpr, bw: number, bh: number, axis: 'x' | 'y'): number {
   if (typeof expr === 'number') { return expr; }
+
   const s = String(expr);
-  const fnMatch = /^(floor|ceil)\((.+)\)$/.exec(s);
-  if (fnMatch) {
-    const val = resolveInner(fnMatch[2], bw, bh, axis);
-    return fnMatch[1] === 'ceil' ? Math.ceil(val) : Math.floor(val);
+  const groupMatch = /^\((.+)\)([.][ud+\-])$/.exec(s);
+  if (groupMatch) {
+    return applySuffixRound(groupMatch[2], resolveInner(groupMatch[1], bw, bh, axis));
   }
+
+  const last2 = s.slice(-2);
+  if (ROUND_SUFFIXES.has(last2)) {
+    return applySuffixRound(last2, resolveInner(s.slice(0, -2).trim(), bw, bh, axis));
+  }
+
   return Math.floor(resolveInner(s, bw, bh, axis));
 }

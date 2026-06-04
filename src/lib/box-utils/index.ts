@@ -18,6 +18,7 @@ export function createAligner(
       ? [resolveAxisExpr(boxAnchor[0], box.width, box.height, 'x'), resolveAxisExpr(boxAnchor[1], box.width, box.height, 'y')]
       : resolveAnchorWithRound(boxAnchor, box.width, box.height);
     const [ox, oy] = resolveAnchorWithRound(rectAnchor, rect.width, rect.height);
+
     return { left: bx - ox, top: by - oy, width: rect.width, height: rect.height };
   };
 }
