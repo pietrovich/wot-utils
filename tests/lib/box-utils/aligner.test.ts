@@ -19,8 +19,8 @@ describe('createAligner', () => {
     expect(aligner({ width: 30, height: 10 })).toEqual({ left: 50, top: 14, width: 30, height: 10 });
   });
 
-  it('rect bottom over explicit point', () => {
-    const aligner = createAligner(box, 'b', [40, 20]);
+  it('rect bottom-middle over explicit point', () => {
+    const aligner = createAligner(box, 'bm', [40, 20]);
     expect(aligner({ width: 30, height: 10 })).toEqual({ left: 25, top: 10, width: 30, height: 10 });
   });
 
@@ -70,6 +70,84 @@ describe('createAligner', () => {
       const a = createAligner(box, 'br', 'br');
       const b = createAligner(box, 'bottom-right', 'right-bottom');
       expect(a({ width: 30, height: 10 })).toEqual(b({ width: 30, height: 10 }));
+    });
+  });
+
+  describe('anchor rounding suffixes', () => {
+    it('tm.+ uses ceil on odd rect width', () => {
+      // tm offset on rect width=7: 7*0.5=3.5 → ceil=4
+      const a = createAligner(box, 'tm.+', [10, 5]);
+      const b = createAligner(box, 'tm.-', [10, 5]);
+      const resultCeil = a({ width: 7, height: 6 });
+      const resultFloor = b({ width: 7, height: 6 });
+      expect(resultCeil.left).toBe(10 - 4); // ceil(3.5)=4
+      expect(resultFloor.left).toBe(10 - 3); // floor(3.5)=3
+    });
+
+    it('.u is alias for .+', () => {
+      const a = createAligner(box, 'tm.+', [10, 5]);
+      const b = createAligner(box, 'tm.u', [10, 5]);
+      expect(a({ width: 7, height: 6 })).toEqual(b({ width: 7, height: 6 }));
+    });
+
+    it('.d is alias for .-', () => {
+      const a = createAligner(box, 'tm.-', [10, 5]);
+      const b = createAligner(box, 'tm.d', [10, 5]);
+      expect(a({ width: 7, height: 6 })).toEqual(b({ width: 7, height: 6 }));
+    });
+  });
+
+  describe('axis expressions', () => {
+    it('r and b resolve to box width and height', () => {
+      const aligner = createAligner(box, 'tl', ['r', 'b']);
+      expect(aligner({ width: 10, height: 5 })).toEqual({ left: 80, top: 24, width: 10, height: 5 });
+    });
+
+    it('r - 2 subtracts from box width', () => {
+      const aligner = createAligner(box, 'tl', ['r - 2', 10]);
+      expect(aligner({ width: 10, height: 5 })).toEqual({ left: 78, top: 10, width: 10, height: 5 });
+    });
+
+    it('c is axis-aware: x→bw/2, y→bh/2 (floor)', () => {
+      const oddBox = { width: 81, height: 25 };
+      const aligner = createAligner(oddBox, 'tl', ['c', 'c']);
+      // floor(81/2)=40, floor(25/2)=12
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 40, top: 12, width: 1, height: 1 });
+    });
+
+    it('floor(c) explicit on odd box', () => {
+      const oddBox = { width: 81, height: 25 };
+      const aligner = createAligner(oddBox, 'tl', ['floor(c)', 'floor(c)']);
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 40, top: 12, width: 1, height: 1 });
+    });
+
+    it('ceil(c) on odd box', () => {
+      const oddBox = { width: 81, height: 25 };
+      const aligner = createAligner(oddBox, 'tl', ['ceil(c)', 'ceil(c)']);
+      // ceil(81/2)=41, ceil(25/2)=13
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 41, top: 13, width: 1, height: 1 });
+    });
+
+    it('floor(r / 3) on 80-wide box', () => {
+      const aligner = createAligner(box, 'tl', ['floor(r / 3)', 5]);
+      // floor(80/3)=floor(26.67)=26
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 26, top: 5, width: 1, height: 1 });
+    });
+
+    it('ceil(r / 3) on 80-wide box', () => {
+      const aligner = createAligner(box, 'tl', ['ceil(r / 3)', 5]);
+      // ceil(80/3)=ceil(26.67)=27
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 27, top: 5, width: 1, height: 1 });
+    });
+
+    it('t and l resolve to 0', () => {
+      const aligner = createAligner(box, 'tl', ['t', 'l']);
+      expect(aligner({ width: 5, height: 5 })).toEqual({ left: 0, top: 0, width: 5, height: 5 });
+    });
+
+    it('t + 5 gives 5', () => {
+      const aligner = createAligner(box, 'tl', ['t + 5', 'l + 3']);
+      expect(aligner({ width: 1, height: 1 })).toEqual({ left: 5, top: 3, width: 1, height: 1 });
     });
   });
 });

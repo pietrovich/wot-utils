@@ -29,7 +29,7 @@ describe('ImageBaker color preset integration', () => {
       gradientBackground(),
       barAndShield(),
       vehicleIcon(app),
-      tierText(createAligner(PogsConstants, 't', [10, 5])),
+      tierText(createAligner(PogsConstants, 'tm', [10, 5])),
       nameText(),
     ]);
     const result = await (await baker.bake(vehicle)).removeAlpha().png().toBuffer();
