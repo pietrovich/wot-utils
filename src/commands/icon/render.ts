@@ -58,7 +58,7 @@ export function iconRenderCommand(app: WGData): Command {
         let layers;
 
         const box = PogsConstants;
-        const tierTextAligner = createAligner(box, 'tm', [10, 5]);
+        const tierTextAligner = createAligner(box, 'tm.+', [10, 5]);
 
         if (bgVersion !== undefined) {
           const version = parseInt(bgVersion.replace(/\D+/g, ''), 10);

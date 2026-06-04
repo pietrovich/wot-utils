@@ -8,6 +8,7 @@ export function saveDebug(filename: string, data: Buffer): void {
   if (!process.env.DEBUG) {
     return;
   }
+
   mkdirSync(tmpDir, { recursive: true });
   writeFileSync(join(tmpDir, filename), data);
 }

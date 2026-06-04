@@ -26,7 +26,7 @@ describe('ImageBaker clear preset integration', () => {
     const baker = new ImageBaker(PogsConstants.width, PogsConstants.height, [
       barAndShield(),
       vehicleIcon(app),
-      tierText(createAligner(PogsConstants, 'tm', [10, 5])),
+      tierText(createAligner(PogsConstants, 'tm.+', [10, 5])),
       nameText(),
     ]);
     const result = await (await baker.bake(vehicle)).png().toBuffer();
