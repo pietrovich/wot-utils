@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
 import type { Vehicle } from '~/types.js';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 import { ImageBaker } from '~/lib/icons/ImageBaker.js';
 import { PogsConstants } from '~/lib/icons/pogs/pogs-constants.js';
 import { gradientBackground } from '~/lib/icons/layers/gradient-background.js';

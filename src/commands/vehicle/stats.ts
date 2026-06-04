@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 
 interface Armor {
   front: number;

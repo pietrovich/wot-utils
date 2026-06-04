@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WGApiError } from '../src/lib/api.js';
-import { WGData } from '../src/WGData.js';
+import { WGData } from '~/lib/WGData.js';
 
 vi.mock('../src/lib/cache.js', () => ({
   getCached: vi.fn().mockResolvedValue(null),

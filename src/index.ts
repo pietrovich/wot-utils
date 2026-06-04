@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import { findPkgRoot } from '~/lib/pkg-root.js';
 config({ path: resolve(findPkgRoot(new URL(import.meta.url)), '.env') });
 import { Command } from 'commander';
-import { WGData } from '~/WGData.js';
+import { WGData } from '~/lib/WGData.js';
 import { listVehiclesCommand } from '~/commands/vehicle/list.js';
 import { exportCommand } from '~/commands/vehicle/export.js';
 import { cachePurgeCommand } from '~/commands/cache/purge.js';

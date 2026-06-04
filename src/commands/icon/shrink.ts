@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 
 export function iconShrinkCommand(app: WGData): Command {
   return new Command('shrink')

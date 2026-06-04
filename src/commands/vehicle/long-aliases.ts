@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
 import { add, isResolved, lookupShortName, save } from '~/lib/icons/pogs/short-names.js';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 
 export function longAliasesCommand(app: WGData): Command {
   return new Command('long-aliases')

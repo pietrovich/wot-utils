@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import type { App } from '~/app.js';
+import type { WGData } from '~/lib/WGData.js';
 import type { FetchResult, TomatoApi } from '~/lib/tomato-api.js';
 import { fromTypeAlias } from '~/lib/vehicle-type-helpers.js';
 import type { Vehicle, VehicleType } from '~/types.js';
@@ -43,7 +43,7 @@ function printSummary(succeeded: number, failed: number): void {
   console.log(summary);
 }
 
-export function tomatoFetchCommand(app: App, tomato: TomatoApi): Command {
+export function tomatoFetchCommand(app: WGData, tomato: TomatoApi): Command {
   return new Command('fetch')
     .description('Fetch Tomato.gg data for one vehicle or a filtered batch')
     .argument('[query]', 'tank_id (number), tag, or short_name')

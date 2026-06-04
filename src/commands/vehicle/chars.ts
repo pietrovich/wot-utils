@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 
 export function charsCommand(app: WGData): Command {
   return new Command('chars').description('List unique characters found in vehicle short names').action(async () => {

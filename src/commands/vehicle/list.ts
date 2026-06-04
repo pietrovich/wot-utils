@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
 import { printJson, printVehiclesTable } from '~/lib/format.js';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 
 export function listVehiclesCommand(app: WGData): Command {
   return new Command('list')

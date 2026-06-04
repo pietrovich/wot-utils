@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import type { WGData } from '~/WGData.js';
+import type { WGData } from '~/lib/WGData.js';
 import type { LayerFactory } from '~/lib/icons/layer-factory.js';
 import { darkenIcon } from '~/lib/utils.js';
 
