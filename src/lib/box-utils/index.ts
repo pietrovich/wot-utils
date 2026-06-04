@@ -17,6 +17,6 @@ export function createAligner(
       ? boxAnchor
       : resolveOffset(boxAnchor, box.width, box.height);
     const [ox, oy] = resolveOffset(rectAnchor, rect.width, rect.height);
-    return { left: bx - ox, top: by - oy, width: rect.width, height: rect.height };
+    return { left: Math.floor(bx - ox), top: Math.floor(by - oy), width: rect.width, height: rect.height };
   };
 }

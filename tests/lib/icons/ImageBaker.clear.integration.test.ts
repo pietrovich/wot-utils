@@ -10,6 +10,7 @@ import { vehicleIcon } from '~/lib/icons/layers/vehicle-icon.js';
 import { tierText } from '~/lib/icons/layers/tier-text.js';
 import { nameText } from '~/lib/icons/layers/name-text.js';
 import { requireDataCache } from '@tests/helpers/require-cache.js';
+import { createAligner } from "~/lib/box-utils/index.js";
 
 const FIXTURE = fileURLToPath(new URL('../../fixtures/icons/pogs/clear/R04_T-34.png', import.meta.url));
 
@@ -25,7 +26,7 @@ describe('ImageBaker clear preset integration', () => {
     const baker = new ImageBaker(PogsConstants.width, PogsConstants.height, [
       barAndShield(),
       vehicleIcon(app),
-      tierText(),
+      tierText(createAligner(PogsConstants, 't', [10, 5])),
       nameText(),
     ]);
     const result = await (await baker.bake(vehicle)).png().toBuffer();

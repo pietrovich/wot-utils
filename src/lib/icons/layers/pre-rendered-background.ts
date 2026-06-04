@@ -36,7 +36,12 @@ export function preRenderedBackground(version: number, flavor: Flavor = ''): Lay
     if (overlay === undefined) {
       const filePath = resolve(dir, filename);
       const fileBuffer = await readFile(filePath);
-      const { data } = await sharp(fileBuffer).ensureAlpha().extract({ left: 0, top: 0, width: w, height: h }).raw().toBuffer({ resolveWithObject: true });
+      const { data } = await sharp(fileBuffer)
+        .ensureAlpha()
+        .extract({ left: 0, top: 0, width: w, height: h })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
       overlay = { input: data, raw: { width: w, height: h, channels: 4 }, left: 0, top: 0 };
       cache.set(filename, overlay);
     }

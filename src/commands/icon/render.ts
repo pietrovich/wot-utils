@@ -12,6 +12,7 @@ import { barAndShield } from '~/lib/icons/layers/bar-and-shield.js';
 import { vehicleIcon } from '~/lib/icons/layers/vehicle-icon.js';
 import { tierText } from '~/lib/icons/layers/tier-text.js';
 import { nameText } from '~/lib/icons/layers/name-text.js';
+import { createAligner } from "~/lib/box-utils/index.js";
 
 type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean; bg?: string; preRenderedBg?: string };
 
@@ -56,14 +57,24 @@ export function iconRenderCommand(app: WGData): Command {
         const bgVersion = options.bg ?? options.preRenderedBg;
         let layers;
 
+        const box = PogsConstants;
+        const tierTextAligner = createAligner(box, 't', [10, 5]);
+
         if (bgVersion !== undefined) {
           const version = parseInt(bgVersion.replace(/\D+/g, ''), 10);
           const flavor = options.color ? '' : 'clear';
-          layers = [preRenderedBackground(version, flavor), vehicleIcon(app), tierText(), nameText()];
+
+
+          layers = [
+            preRenderedBackground(version, flavor),
+            vehicleIcon(app),
+            tierText(tierTextAligner),
+            nameText()
+          ];
         } else {
           layers = options.color
-            ? [gradientBackground(), barAndShield(), vehicleIcon(app), tierText(), nameText()]
-            : [barAndShield(), vehicleIcon(app), tierText(), nameText()];
+            ? [gradientBackground(), barAndShield(), vehicleIcon(app), tierText(tierTextAligner), nameText()]
+            : [barAndShield(), vehicleIcon(app), tierText(tierTextAligner), nameText()];
         }
 
         const vehicles: Vehicle[] = options.all
