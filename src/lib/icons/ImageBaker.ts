@@ -6,18 +6,26 @@ export class ImageBaker {
   readonly #w: number;
   readonly #h: number;
   readonly #layers: LayerFactory[];
+  readonly #finalizer: ((s: sharp.Sharp) => sharp.Sharp) | undefined;
 
-  constructor(w: number, h: number, layers: LayerFactory[]) {
+  constructor(
+    w: number,
+    h: number,
+    layers: LayerFactory[],
+    finalizer?: (s: sharp.Sharp) => sharp.Sharp,
+  ) {
     this.#w = w;
     this.#h = h;
     this.#layers = layers;
+    this.#finalizer = finalizer;
   }
 
   async bake(vehicle: Vehicle): Promise<sharp.Sharp> {
     const blank = Buffer.alloc(this.#w * this.#h * 4, 0);
     const results = await Promise.all(this.#layers.map((fn) => fn(this.#w, this.#h, vehicle)));
     const overlays = results.filter((o): o is sharp.OverlayOptions => o !== null);
+    const result = sharp(blank, { raw: { width: this.#w, height: this.#h, channels: 4 } }).composite(overlays);
 
-    return sharp(blank, { raw: { width: this.#w, height: this.#h, channels: 4 } }).composite(overlays);
+    return this.#finalizer ? this.#finalizer(result) : result;
   }
 }

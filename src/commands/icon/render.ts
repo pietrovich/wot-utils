@@ -4,25 +4,20 @@ import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
 import type { Vehicle } from '~/types.js';
 import type { WGData } from '~/lib/WGData.js';
-import { ImageBaker } from '~/lib/icons/ImageBaker.js';
-import { PogsConstants } from '~/lib/icons/pogs/pogs-constants.js';
-import { gradientBackground } from '~/lib/icons/layers/gradient-background.js';
-import { preRenderedBackground } from '~/lib/icons/layers/pre-rendered-background.js';
-import { barAndShield } from '~/lib/icons/layers/bar-and-shield.js';
-import { vehicleIcon } from '~/lib/icons/layers/vehicle-icon.js';
-import { tierText } from '~/lib/icons/layers/tier-text.js';
-import { nameText } from '~/lib/icons/layers/name-text.js';
-import { createAligner } from "~/lib/box-utils/index.js";
+import type { ImageBaker } from '~/lib/icons/ImageBaker.js';
+import type { IconBuilder } from '~/lib/icons/pogs/icon-builder.js';
+import { PogsClear } from '~/lib/icons/pogs/PogsClear.js';
+import { PogsColor } from '~/lib/icons/pogs/PogsColor.js';
+import { PogsClearV2 } from '~/lib/icons/pogs/PogsClearV2.js';
+import { PogsColorV2 } from '~/lib/icons/pogs/PogsColorV2.js';
 
 type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean; bg?: string; preRenderedBg?: string };
 
 const CONCURRENCY = 5;
 
-async function renderOne(vehicle: Vehicle, baker: ImageBaker, outDir: string, color: boolean): Promise<void> {
+async function renderOne(vehicle: Vehicle, baker: ImageBaker, outDir: string): Promise<void> {
   const outPath = join(outDir, `${vehicle.tag}.png`);
-  const rendered = await baker.bake(vehicle);
-  const pipeline = color ? rendered.removeAlpha() : rendered;
-  const info = await pipeline.png().toFile(outPath);
+  const info = await (await baker.bake(vehicle)).png().toFile(outPath);
   console.log(`${outPath} — ${info.width}×${info.height}px`);
 }
 
@@ -55,41 +50,27 @@ export function iconRenderCommand(app: WGData): Command {
         }
 
         const bgVersion = options.bg ?? options.preRenderedBg;
-        let layers;
-
-        const box = PogsConstants;
-        const tierTextAligner = createAligner(box, 'tm.+', [10, 5]);
+        let builder: IconBuilder;
 
         if (bgVersion !== undefined) {
           const version = parseInt(bgVersion.replace(/\D+/g, ''), 10);
-          const flavor = options.color ? '' : 'clear';
-
-
-          layers = [
-            preRenderedBackground(version, flavor),
-            vehicleIcon(app),
-            tierText(tierTextAligner),
-            nameText()
-          ];
+          builder = options.color ? new PogsColorV2(version) : new PogsClearV2(version);
         } else {
-          layers = options.color
-            ? [gradientBackground(), barAndShield(), vehicleIcon(app), tierText(tierTextAligner), nameText()]
-            : [barAndShield(), vehicleIcon(app), tierText(tierTextAligner), nameText()];
+          builder = options.color ? new PogsColor() : new PogsClear();
         }
 
         const vehicles: Vehicle[] = options.all
           ? await app.getVehicles()
           : [await app.findVehicle(query!)];
 
-        const bakers = Array.from({ length: CONCURRENCY }, () => new ImageBaker(PogsConstants.width, PogsConstants.height, layers));
-        const color = options.color ?? false;
+        const bakers = Array.from({ length: CONCURRENCY }, () => builder.createBaker(app));
         let idx = 0;
 
         await Promise.all(
           bakers.map(async (baker) => {
             while (idx < vehicles.length) {
               const vehicle = vehicles[idx++];
-              await renderOne(vehicle, baker, outDir, color);
+              await renderOne(vehicle, baker, outDir);
             }
           }),
         );
