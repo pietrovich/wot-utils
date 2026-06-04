@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeAll } from 'vitest';
-import { WGData } from '~/WGData.js';
+import { saveDebug } from '@tests/helpers/debug.js';
+import { WGData } from '~/lib/WGData.js';
 import { ImageBaker } from '~/lib/icons/ImageBaker.js';
 import { PogsConstants } from '~/lib/icons/pogs/pogs-constants.js';
 import { barAndShield } from '~/lib/icons/layers/bar-and-shield.js';
@@ -28,6 +29,7 @@ describe('ImageBaker clear preset integration', () => {
       nameText(),
     ]);
     const result = await (await baker.bake(vehicle)).png().toBuffer();
+    saveDebug('ImageBaker.clear.png', result);
     const expected = readFileSync(FIXTURE);
     expect(result.equals(expected)).toBe(true);
   });
