@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { PixelFont } from '~/lib/PixelFont.js';
+import { PixelFont, type GlyphPixels } from '~/lib/PixelFont.js';
 import { Colors, type ColorValue } from '~/lib/colors.js';
 import { fonts } from '~/lib/fonts/index.js';
 
@@ -11,20 +11,43 @@ export interface RenderedText {
   height: number;
 }
 
+type PreparedGlyphs = { chars: string[]; charPixels: (GlyphPixels | null)[]; charWidths: number[]; width: number; height: number };
 
-export function renderText(fontName: string, text: unknown, color: ColorValue = Colors.white): RenderedText {
+const prepareGlyphsCache = new Map<string, PreparedGlyphs>();
+
+function prepareGlyphs(fontName: string, text: unknown): PreparedGlyphs {
   const str = String(text);
-  const fontDef = fonts[fontName];
-  if (!fontDef) {
-    throw new Error(`Unknown font: "${fontName}". Available: ${Object.keys(fonts).join(', ')}`);
+  const key = `${fontName}:${str}`;
+  let result = prepareGlyphsCache.get(key);
+
+  if (result === undefined) {
+    const fontDef = fonts[fontName];
+    if (!fontDef) {
+      throw new Error(`Unknown font: "${fontName}". Available: ${Object.keys(fonts).join(', ')}`);
+    }
+
+    const pf = new PixelFont(fontDef);
+    const chars = [...str];
+    const charPixels = chars.map((ch) => pf.getPixels(ch));
+    const charWidths = charPixels.map((p) => p?.width ?? 0);
+    const width = charWidths.reduce((s, w) => s + w, 0) + CHAR_GAP * Math.max(0, chars.length - 1);
+    const height = chars.length > 0 ? Math.max(...charPixels.map((p) => p?.height ?? 0)) : 0;
+
+    result = { chars, charPixels, charWidths, width, height };
+    prepareGlyphsCache.set(key, result);
   }
 
-  const pf = new PixelFont(fontDef);
-  const chars = [...str];
-  const charPixels = chars.map((ch) => pf.getPixels(ch));
-  const charWidths = charPixels.map((p) => p?.width ?? 0);
-  const width = charWidths.reduce((s, w) => s + w, 0) + CHAR_GAP * Math.max(0, chars.length - 1);
-  const height = chars.length > 0 ? Math.max(...charPixels.map((p) => p?.height ?? 0)) : 0;
+  return result;
+}
+
+export function getTextBox(fontName: string, text: unknown): { width: number; height: number } {
+  const { width, height } = prepareGlyphs(fontName, text);
+
+  return { width, height };
+}
+
+export function renderText(fontName: string, text: unknown, color: ColorValue = Colors.white): RenderedText {
+  const { chars, charPixels, charWidths, width, height } = prepareGlyphs(fontName, text);
 
   const cr = (color >>> 24) & 0xff;
   const cg = (color >>> 16) & 0xff;
