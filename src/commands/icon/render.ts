@@ -8,7 +8,9 @@ import type { ImageBaker } from '~/lib/icons/ImageBaker.js';
 import type { IconBuilder } from '~/lib/icons/pogs/icon-builder.js';
 import { PogsClear } from '~/lib/icons/pogs/PogsClear.js';
 import { PogsColor } from '~/lib/icons/pogs/PogsColor.js';
+import { PogsClearV1 } from '~/lib/icons/pogs/PogsClearV1.js';
 import { PogsClearV2 } from '~/lib/icons/pogs/PogsClearV2.js';
+import { PogsColorV1 } from '~/lib/icons/pogs/PogsColorV1.js';
 import { PogsColorV2 } from '~/lib/icons/pogs/PogsColorV2.js';
 
 type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean; bg?: string; preRenderedBg?: string };
@@ -54,7 +56,11 @@ export function iconRenderCommand(app: WGData): Command {
 
         if (bgVersion !== undefined) {
           const version = parseInt(bgVersion.replace(/\D+/g, ''), 10);
-          builder = options.color ? new PogsColorV2(version) : new PogsClearV2(version);
+          if (version === 1) {
+            builder = options.color ? new PogsColorV1() : new PogsClearV1();
+          } else {
+            builder = options.color ? new PogsColorV2() : new PogsClearV2();
+          }
         } else {
           builder = options.color ? new PogsColor() : new PogsClear();
         }

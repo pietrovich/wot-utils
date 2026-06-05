@@ -9,12 +9,13 @@ import { createAligner } from '~/lib/box-utils/index.js';
 import type { IconBuilder } from '~/lib/icons/pogs/icon-builder.js';
 
 const tierTextAligner = createAligner(PogsConstants, 'tm.+', [10, 5]);
+const iconAligner = createAligner(PogsConstants, 'bl.+', [18, 1]);
 
 export class PogsClear implements IconBuilder {
   createBaker(app: WGData): ImageBaker {
     return new ImageBaker(
       PogsConstants,
-      [barAndShield(), vehicleIcon(app), tierText(tierTextAligner), nameText()],
+      [barAndShield(), vehicleIcon(app, iconAligner), tierText(tierTextAligner), nameText()],
     );
   }
 }
