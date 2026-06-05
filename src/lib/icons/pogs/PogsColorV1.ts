@@ -7,6 +7,8 @@ import { tierText } from '~/lib/icons/layers/tier-text.js';
 import { nameText } from '~/lib/icons/layers/name-text.js';
 import { createAligner } from '~/lib/box-utils/index.js';
 import type { IconBuilder } from '~/lib/icons/pogs/icon-builder.js';
+import { textViewRange } from "~/lib/icons/layers/text-view-range.js";
+import { textReload } from "~/lib/icons/layers/text-reload.js";
 
 const tierTextAligner = createAligner(PogsConstants, 'tm.+', [10, 5]);
 
@@ -19,8 +21,11 @@ export class PogsColorV1 implements IconBuilder {
       [
         preRenderedBackground(this.version, ''),
         vehicleIcon(data),
+        textViewRange(data),
+        textReload(data),
         tierText(tierTextAligner),
-        nameText()
+        nameText(),
+
       ],
       (s) => s.removeAlpha(),
     );

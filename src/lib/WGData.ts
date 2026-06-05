@@ -161,9 +161,7 @@ export class WGData {
     console.error(`\nDone: ${downloaded} downloaded, ${skipped} skipped, ${failed} failed`);
   }
 
-  async inferBestConfig(query: number | string): Promise<Record<ModuleType, number>> {
-    const vehicle = await this.findVehicle(query);
-
+  getBestConfig(vehicle: Vehicle): Record<ModuleType, number> {
     const byType = new Map<ModuleType, ModuleNode[]>();
     for (const node of Object.values(vehicle.modules_tree)) {
       const list = byType.get(node.type) ?? [];
@@ -181,6 +179,10 @@ export class WGData {
     return result;
   }
 
+  async inferBestConfig(query: number | string): Promise<Record<ModuleType, number>> {
+    return this.getBestConfig(await this.findVehicle(query));
+  }
+
   configToProfileId(config: Partial<Record<ModuleType, number>>): string {
     return Object.values(config)
       .filter((id): id is number => id != null)
@@ -188,9 +190,9 @@ export class WGData {
       .join('-');
   }
 
-  async getStatsForBestConfig(query: number | string): Promise<unknown> {
-    const vehicle = await this.findVehicle(query);
-    const config = await this.inferBestConfig(query);
+  async getStatsForBestConfig(query: number | string | Vehicle): Promise<unknown> {
+    const vehicle = typeof query === 'object' ? query : await this.findVehicle(query);
+    const config = this.getBestConfig(vehicle);
     const profileId = this.configToProfileId(config);
 
     const endpoint = 'encyclopedia/vehicleprofile';
