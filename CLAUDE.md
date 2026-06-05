@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Never commit anything unless the user explicitly asks to.
 
+## Collaboration
+
+When a direct instruction seems wrong, redundant, or improvable — say so and ask for confirmation before doing anything differently. Never silently substitute a reduced or altered version. Surfacing concerns is good; acting on them unilaterally is not.
+
 ## Commit messages
 
 Focus on the *why* — what problem is solved or what capability is added. Implementation
