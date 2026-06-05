@@ -6,11 +6,11 @@ export function solidBackground(color: [number, number, number, number] = [0, 0,
   const [r, g, b, a] = color;
   const key = `${r},${g},${b},${a}`;
 
-  return async (w, h) => {
+  return async (box, _prev) => {
     let overlay = cache.get(key);
 
     if (overlay === undefined) {
-      const pixels = Buffer.alloc(w * h * 4);
+      const pixels = Buffer.alloc(box.width * box.height * 4);
       for (let i = 0; i < pixels.length; i += 4) {
         pixels[i] = r;
         pixels[i + 1] = g;
@@ -18,7 +18,7 @@ export function solidBackground(color: [number, number, number, number] = [0, 0,
         pixels[i + 3] = a;
       }
 
-      overlay = { input: pixels, raw: { width: w, height: h, channels: 4 }, left: 0, top: 0 };
+      overlay = { input: pixels, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0 };
       cache.set(key, overlay);
     }
 

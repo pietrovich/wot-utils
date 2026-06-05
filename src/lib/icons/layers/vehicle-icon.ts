@@ -26,7 +26,7 @@ function fitToBox(srcW: number, srcH: number): { width: number; height: number }
 }
 
 export function vehicleIcon(app: WGData): LayerFactory {
-  return async (_w, h, vehicle) => {
+  return async (box, _prev, vehicle) => {
     const iconResult = await app.getDefaultVehicleIcon(vehicle, 'medium');
     if (!iconResult) {
       return null;
@@ -45,7 +45,7 @@ export function vehicleIcon(app: WGData): LayerFactory {
       input: scaledData,
       raw: { width: scaledInfo.width, height: scaledInfo.height, channels: scaledInfo.channels as 1 | 2 | 3 | 4 },
       left: ICON_X,
-      top: h - (iconH + 1),
+      top: box.height - (iconH + 1),
     };
   };
 }

@@ -6,7 +6,7 @@ const NAME_X = 18;
 const NAME_Y = 2;
 
 export function nameText(): LayerFactory {
-  return async (_w, _h, vehicle) => {
+  return async (_box, _prev, vehicle) => {
     const alias = lookupShortName(vehicle).toLowerCase();
 
     const { data, width, height } = await renderWithShadow('pogs4px', alias);

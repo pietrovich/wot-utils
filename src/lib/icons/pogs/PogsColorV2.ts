@@ -19,8 +19,7 @@ export class PogsColorV2 implements IconBuilder {
 
   createBaker(app: WGData): ImageBaker {
     return new ImageBaker(
-      PogsConstants.width,
-      PogsConstants.height,
+      PogsConstants,
       [preRenderedBackground(this.#version, ''), vehicleIcon(app), tierText(tierTextAligner), nameText()],
       (s) => s.removeAlpha(),
     );

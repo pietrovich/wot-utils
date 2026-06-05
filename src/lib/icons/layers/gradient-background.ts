@@ -16,7 +16,7 @@ const TYPE_TO_KEY: Record<VehicleType, keyof BgColors> = {
 export function gradientBackground(colors: BgColors = bgColors): LayerFactory {
   const cache = new Map<string, sharp.OverlayOptions>();
 
-  return async (w, _h, vehicle) => {
+  return async (box, _prev, vehicle) => {
     const key = TYPE_TO_KEY[vehicle.type];
     const rows = colors[key];
     if (!rows) {
@@ -26,11 +26,11 @@ export function gradientBackground(colors: BgColors = bgColors): LayerFactory {
     let overlay = cache.get(key);
     if (overlay === undefined) {
       const height = rows.length;
-      const pixels = Buffer.alloc(w * height * 4);
+      const pixels = Buffer.alloc(box.width * height * 4);
       for (let y = 0; y < height; y++) {
         const [r, g, b] = rows[y];
-        for (let x = 0; x < w; x++) {
-          const i = (y * w + x) * 4;
+        for (let x = 0; x < box.width; x++) {
+          const i = (y * box.width + x) * 4;
           pixels[i] = r;
           pixels[i + 1] = g;
           pixels[i + 2] = b;
@@ -38,7 +38,7 @@ export function gradientBackground(colors: BgColors = bgColors): LayerFactory {
         }
       }
 
-      overlay = { input: pixels, raw: { width: w, height, channels: 4 }, left: 0, top: 0 };
+      overlay = { input: pixels, raw: { width: box.width, height, channels: 4 }, left: 0, top: 0 };
       cache.set(key, overlay);
     }
 

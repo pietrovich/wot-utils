@@ -1,11 +1,11 @@
 import type { LayerFactory } from '~/lib/icons/layer-factory.js';
-import type { Rect, Positioned } from '~/lib/box-utils/index.js';
+import type { Aligner } from '~/lib/box-utils/index.js';
 import { renderWithShadow } from '~/lib/render-text.js';
 
-export function tierText(aligner: (rect: Rect) => Positioned): LayerFactory {
+export function tierText(aligner: Aligner): LayerFactory {
   const cache = new Map<number, { data: Buffer; width: number; height: number }>();
 
-  return async (_w, _h, vehicle) => {
+  return async (_box, _prev, vehicle) => {
     let rendered = cache.get(vehicle.tier);
 
     if (rendered === undefined) {
@@ -17,7 +17,7 @@ export function tierText(aligner: (rect: Rect) => Positioned): LayerFactory {
       cache.set(vehicle.tier, rendered);
     }
 
-    const { left, top } = aligner(rendered);
+    const { left, top } = aligner.align(rendered);
 
     return { input: rendered.data, raw: { width: rendered.width, height: rendered.height, channels: 4 }, left, top };
   };

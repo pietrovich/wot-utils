@@ -13,8 +13,7 @@ const tierTextAligner = createAligner(PogsConstants, 'tm.+', [10, 5]);
 export class PogsClear implements IconBuilder {
   createBaker(app: WGData): ImageBaker {
     return new ImageBaker(
-      PogsConstants.width,
-      PogsConstants.height,
+      PogsConstants,
       [barAndShield(), vehicleIcon(app), tierText(tierTextAligner), nameText()],
     );
   }

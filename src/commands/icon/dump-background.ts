@@ -11,7 +11,7 @@ export function dumpBackgroundCommand(): Command {
   return new Command('dump-background')
     .description('Write a composited tank-type icon background (gradient + shield) for each type to cwd')
     .action(async () => {
-      const baker = new ImageBaker(PogsConstants.width, PogsConstants.height, [
+      const baker = new ImageBaker(PogsConstants, [
         gradientBackground(),
         barAndShield(),
       ]);

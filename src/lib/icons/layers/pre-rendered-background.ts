@@ -21,7 +21,7 @@ export function preRenderedBackground(version: number, flavor: Flavor = ''): Lay
   const cache = new Map<string, sharp.OverlayOptions>();
   const dir = resolve(projectRoot, `assets/pogs-fixed/pre-rendered/combined-v${version}`);
 
-  return async (w, h, vehicle) => {
+  return async (box, _prev, vehicle) => {
     if (version === 1) {
       flavor = ''
     }
@@ -38,11 +38,11 @@ export function preRenderedBackground(version: number, flavor: Flavor = ''): Lay
       const fileBuffer = await readFile(filePath);
       const { data } = await sharp(fileBuffer)
         .ensureAlpha()
-        .extract({ left: 0, top: 0, width: w, height: h })
+        .extract({ left: 0, top: 0, width: box.width, height: box.height })
         .raw()
         .toBuffer({ resolveWithObject: true });
 
-      overlay = { input: data, raw: { width: w, height: h, channels: 4 }, left: 0, top: 0 };
+      overlay = { input: data, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0 };
       cache.set(filename, overlay);
     }
 
