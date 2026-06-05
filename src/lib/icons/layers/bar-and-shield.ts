@@ -1,13 +1,13 @@
 import { resolve } from 'node:path';
 import sharp from 'sharp';
 import { findPkgRoot } from '~/lib/pkg-root.js';
-import type { LayerFactory } from '~/lib/icons/layer-factory.js';
+import type { LayerFactory, LayerRenderResult } from '~/lib/icons/layer-factory.js';
 
 const SHIELD_PATH = resolve(findPkgRoot(new URL(import.meta.url)), 'assets/pogs/sheild.png');
 const STRIPE_PATH = resolve(findPkgRoot(new URL(import.meta.url)), 'assets/pogs/stripe.png');
 
 export function barAndShield(): LayerFactory {
-  const cache = new Map<string, sharp.OverlayOptions>();
+  const cache = new Map<string, LayerRenderResult>();
 
   return async (box, _prev, _vehicle) => {
     const key = `${box.width}x${box.height}`;
@@ -21,7 +21,7 @@ export function barAndShield(): LayerFactory {
         ])
         .raw()
         .toBuffer({ resolveWithObject: true });
-      overlay = { input: data, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0 };
+      overlay = { input: data, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0, meta: { width: box.width, height: box.height, left: 0, top: 0 } };
       cache.set(key, overlay);
     }
 

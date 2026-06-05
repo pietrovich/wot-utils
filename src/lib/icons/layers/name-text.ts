@@ -11,6 +11,6 @@ export function nameText(): LayerFactory {
 
     const { data, width, height } = await renderWithShadow('pogs4px', alias);
 
-    return { input: data, raw: { width, height, channels: 4 }, left: NAME_X, top: NAME_Y };
+    return { input: data, raw: { width, height, channels: 4 }, left: NAME_X, top: NAME_Y, meta: { width, height, left: NAME_X, top: NAME_Y, text: alias } };
   };
 }

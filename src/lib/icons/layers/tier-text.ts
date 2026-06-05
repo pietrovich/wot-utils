@@ -19,6 +19,6 @@ export function tierText(aligner: Aligner): LayerFactory {
 
     const { left, top } = aligner.align(rendered);
 
-    return { input: rendered.data, raw: { width: rendered.width, height: rendered.height, channels: 4 }, left, top };
+    return { input: rendered.data, raw: { width: rendered.width, height: rendered.height, channels: 4 }, left, top, meta: { width: rendered.width, height: rendered.height, left, top, text: vehicle.tier } };
   };
 }

@@ -1,8 +1,7 @@
-import type sharp from 'sharp';
-import type { LayerFactory } from '~/lib/icons/layer-factory.js';
+import type { LayerFactory, LayerRenderResult } from '~/lib/icons/layer-factory.js';
 
 export function solidBackground(color: [number, number, number, number] = [0, 0, 0, 255]): LayerFactory {
-  const cache = new Map<string, sharp.OverlayOptions>();
+  const cache = new Map<string, LayerRenderResult>();
   const [r, g, b, a] = color;
   const key = `${r},${g},${b},${a}`;
 
@@ -18,7 +17,7 @@ export function solidBackground(color: [number, number, number, number] = [0, 0,
         pixels[i + 3] = a;
       }
 
-      overlay = { input: pixels, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0 };
+      overlay = { input: pixels, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0, meta: { width: box.width, height: box.height, left: 0, top: 0 } };
       cache.set(key, overlay);
     }
 

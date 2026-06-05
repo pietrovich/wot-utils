@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import sharp from 'sharp';
-import type { LayerFactory } from '~/lib/icons/layer-factory.js';
+import type { LayerFactory, LayerRenderResult } from '~/lib/icons/layer-factory.js';
 import { findPkgRoot } from '~/lib/pkg-root.js';
 import type { VehicleType } from '~/types.js';
 
@@ -18,7 +18,7 @@ const TYPE_MAP: Record<VehicleType, string> = {
 const projectRoot = findPkgRoot(new URL(import.meta.url));
 
 export function preRenderedBackground(version: number, flavor: Flavor = ''): LayerFactory {
-  const cache = new Map<string, sharp.OverlayOptions>();
+  const cache = new Map<string, LayerRenderResult>();
   const dir = resolve(projectRoot, `assets/pogs-fixed/pre-rendered/combined-v${version}`);
 
   return async (box, _prev, vehicle) => {
@@ -42,7 +42,7 @@ export function preRenderedBackground(version: number, flavor: Flavor = ''): Lay
         .raw()
         .toBuffer({ resolveWithObject: true });
 
-      overlay = { input: data, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0 };
+      overlay = { input: data, raw: { width: box.width, height: box.height, channels: 4 }, left: 0, top: 0, meta: { width: box.width, height: box.height, left: 0, top: 0 } };
       cache.set(filename, overlay);
     }
 

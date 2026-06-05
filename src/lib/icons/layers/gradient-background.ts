@@ -1,6 +1,5 @@
-import type sharp from 'sharp';
 import { bgColors } from '~/lib/icons/pogs/background-colors.js';
-import type { LayerFactory } from '~/lib/icons/layer-factory.js';
+import type { LayerFactory, LayerRenderResult } from '~/lib/icons/layer-factory.js';
 import type { VehicleType } from '~/types.js';
 
 type BgColors = typeof bgColors;
@@ -14,13 +13,13 @@ const TYPE_TO_KEY: Record<VehicleType, keyof BgColors> = {
 };
 
 export function gradientBackground(colors: BgColors = bgColors): LayerFactory {
-  const cache = new Map<string, sharp.OverlayOptions>();
+  const cache = new Map<string, LayerRenderResult>();
 
   return async (box, _prev, vehicle) => {
     const key = TYPE_TO_KEY[vehicle.type];
     const rows = colors[key];
     if (!rows) {
-      throw new Error(`No gradient colors for vehicle type: ${vehicle.type}`);
+      throw new Error(`No gradient colors for vehicle type: ${ vehicle.type }`);
     }
 
     let overlay = cache.get(key);
@@ -28,7 +27,7 @@ export function gradientBackground(colors: BgColors = bgColors): LayerFactory {
       const height = rows.length;
       const pixels = Buffer.alloc(box.width * height * 4);
       for (let y = 0; y < height; y++) {
-        const [r, g, b] = rows[y];
+        const [ r, g, b ] = rows[y];
         for (let x = 0; x < box.width; x++) {
           const i = (y * box.width + x) * 4;
           pixels[i] = r;
@@ -38,10 +37,17 @@ export function gradientBackground(colors: BgColors = bgColors): LayerFactory {
         }
       }
 
-      overlay = { input: pixels, raw: { width: box.width, height, channels: 4 }, left: 0, top: 0 };
+      overlay = {
+        input: pixels,
+        raw: { width: box.width, height, channels: 4 },
+        left: 0,
+        top: 0,
+        meta: { width: box.width, height, left: 0, top: 0 }
+      };
       cache.set(key, overlay);
     }
 
     return overlay;
   };
 }
+

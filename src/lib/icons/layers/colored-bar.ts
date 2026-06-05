@@ -14,6 +14,6 @@ export function coloredBar(color: [number, number, number]): LayerFactory {
       pixels[i + 3] = 255;
     }
 
-    return { input: pixels, raw: { width: box.width, height: BAR_H, channels: 4 }, left: 0, top: 0 };
+    return { input: pixels, raw: { width: box.width, height: BAR_H, channels: 4 }, left: 0, top: 0, meta: { width: box.width, height: BAR_H, left: 0, top: 0 } };
   };
 }

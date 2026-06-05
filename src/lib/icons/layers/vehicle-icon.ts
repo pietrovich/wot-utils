@@ -46,6 +46,7 @@ export function vehicleIcon(app: WGData): LayerFactory {
       raw: { width: scaledInfo.width, height: scaledInfo.height, channels: scaledInfo.channels as 1 | 2 | 3 | 4 },
       left: ICON_X,
       top: box.height - (iconH + 1),
+      meta: { width: scaledInfo.width, height: scaledInfo.height, left: ICON_X, top: box.height - (iconH + 1) },
     };
   };
 }
