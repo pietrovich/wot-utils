@@ -8,30 +8,25 @@ import { Colors } from "~/lib/colors.js";
 
 import type { VehicleProfile } from '~/lib/icons/layers/vehicle-profile.js';
 
-const defaultAligner = createAligner(PogsConstants, 'br', ['r', 'b - 8']);
+const defaultAligner = createAligner(PogsConstants, 'rt', ['r', 9]);
 
-export function textTurretArmor(app: WGData, aligner: Aligner = defaultAligner): LayerFactory {
-  return async (_box, prev, vehicle) => {
+export function textDamage(app: WGData, aligner: Aligner = defaultAligner): LayerFactory {
+  return async (_box, _prev, vehicle) => {
     const profiles = await app.getStatsForBestConfig(vehicle) as Record<string, VehicleProfile>;
-    const turret = profiles[vehicle.tank_id]?.armor?.turret;
-    if (!turret) {
+    const text = profiles[vehicle.tank_id]?.ammo?.[0].damage?.[1];
+    if (text === undefined) {
       return null;
     }
 
-    const text = `${ turret.front }*`
-
-    const { data, width, height } = await renderWithShadow('pogs4px', text, Colors.white);
-
-    const offsetX = -1 * prev!.meta!.width + width;
-    const shifted = aligner.shift(offsetX, 0)
-    const { left, top } = shifted.align({ width, height });
+    const { data, width, height } = await renderWithShadow('pogs4px', text, Colors.beige);
+    const { left, top } = aligner.align({ width, height });
 
     return {
       input: data,
       raw: { width, height, channels: 4 },
       left,
       top,
-      meta: { width, height, left, top, text },
+      meta: { width, height, left, top, text: text },
     };
   };
 }

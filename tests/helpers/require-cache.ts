@@ -1,7 +1,9 @@
+import 'dotenv/config';
 import { existsSync } from 'node:fs';
 
 export function requireDataCache(): void {
-  const dir = process.env.WG_CACHE_DIR ?? '.data/cache';
+  const dir = process.env.WG_CACHE_DIR ?? '.data/wg/cache';
+
   if (!existsSync(dir)) {
     throw new Error(
       `Data cache directory not found: "${dir}"\n` +
