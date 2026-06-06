@@ -162,18 +162,46 @@ export class WGData {
   }
 
   getBestConfig(vehicle: Vehicle): Record<ModuleType, number> {
-    const byType = new Map<ModuleType, ModuleNode[]>();
-    for (const node of Object.values(vehicle.modules_tree)) {
-      const list = byType.get(node.type) ?? [];
-      list.push(node);
-      byType.set(node.type, list);
+    const tree = vehicle.modules_tree;
+
+    const parent = new Map<number, number>();
+    for (const node of Object.values(tree)) {
+      if (node.next_modules) {
+        for (const childId of node.next_modules) {
+          parent.set(childId, node.module_id);
+        }
+      }
+    }
+
+    const depths = new Map<number, number>();
+    const depth = (id: number): number => {
+      let d = depths.get(id);
+      if (d === undefined) {
+        const p = parent.get(id);
+        d = p === undefined ? 0 : 1 + depth(p);
+        depths.set(id, d);
+      }
+
+      return d;
+    };
+
+    const byType = new Map<ModuleType, ModuleNode>();
+    for (const node of Object.values(tree)) {
+      const current = byType.get(node.type);
+      if (current === undefined) {
+        byType.set(node.type, node);
+      } else {
+        const nd = depth(node.module_id);
+        const cd = depth(current.module_id);
+        if (nd > cd || (nd === cd && node.module_id > current.module_id)) {
+          byType.set(node.type, node);
+        }
+      }
     }
 
     const result = {} as Record<ModuleType, number>;
-    for (const [type, modules] of byType) {
-      const terminals = modules.filter((m) => m.next_modules === null);
-      const candidates = terminals.length > 0 ? terminals : modules;
-      result[type] = candidates.reduce((a, b) => (b.module_id > a.module_id ? b : a)).module_id;
+    for (const [type, node] of byType) {
+      result[type] = node.module_id;
     }
 
     return result;
@@ -202,7 +230,9 @@ export class WGData {
       profile_id: profileId,
     };
 
-    const cached = await getCached<unknown>('vehicle-profile', endpoint, params);
+    const cacheFilePrefix = `vehicle-${String(vehicle.tank_id).padStart(5, '0')}-profile`;
+
+    const cached = await getCached<unknown>(cacheFilePrefix, endpoint, params);
     if (cached) {
       return cached;
     }
@@ -217,11 +247,25 @@ export class WGData {
 
     if (json.status === 'error') {
       const err = json.error!;
+
+      console.log('failed to find profile', { params });
+
       throw new WGApiError(err.field, err.code, err.message);
     }
+    // IS-3-II
+    //
+
+    // d2
+    // 579 = d2 APX 4 turret, opens 1348
+    // 1348 = gun 47mm SA37
+    // 1093 = engine (+)
+    // 834 = chassis (+)
+    // 583 = radio (+)
+    // 323 = turret (-)
+
 
     const data = json.data!;
-    await setCached('vehicle-profile', endpoint, params, data);
+    await setCached(cacheFilePrefix, endpoint, params, data);
 
     return data;
   }
