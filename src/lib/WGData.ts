@@ -4,6 +4,7 @@ import { join, basename } from 'node:path';
 import sharp from 'sharp';
 import { getAppId } from '~/lib/config.js';
 import { WGApiError } from '~/lib/api.js';
+import { logger } from '~/lib/logger.js';
 import { getCached, setCached, purgeCache as purgeCacheLib } from '~/lib/cache.js';
 import type { Vehicle, VehiclesData, WGApiResponse, ModuleType, ModuleNode, VehicleIconSize } from '~/types.js';
 
@@ -57,10 +58,12 @@ export class WGData {
 
       if (cached) {
         this.vehicles = cached;
+        logger.debug('vehicles: cache hit');
 
         return Object.values(cached);
       }
 
+      logger.debug('vehicles: fetching from API');
       this.vehicles = await this.fetchVehicles();
 
       await setCached('list-vehicles', endpoint, {}, this.vehicles);
@@ -103,9 +106,12 @@ export class WGData {
     const dest = join(this.iconsBaseDir, size, basename(url));
 
     if (!force && (await fileExists(dest))) {
+      logger.debug({ tag: vehicle.tag, size, dest }, 'icon: cached');
+
       return { skipped: true, downloaded: false, failed: false, path: dest, error: null };
     }
 
+    logger.debug({ tag: vehicle.tag, size, url }, 'icon: downloading');
     try {
       await downloadIcon(url, dest);
 
@@ -204,6 +210,8 @@ export class WGData {
       result[type] = node.module_id;
     }
 
+    logger.debug({ tank_id: vehicle.tank_id, config: result }, 'best config');
+
     return result;
   }
 
@@ -234,9 +242,12 @@ export class WGData {
 
     const cached = await getCached<unknown>(cacheFilePrefix, endpoint, params);
     if (cached) {
+      logger.debug({ tank_id: vehicle.tank_id, profileId }, 'profile: cache hit');
+
       return cached;
     }
 
+    logger.debug({ tank_id: vehicle.tank_id, profileId }, 'profile: fetching from API');
     const url = new URL(`https://api.worldoftanks.eu/wot/${endpoint}/`);
     for (const [k, v] of Object.entries(params)) {
       url.searchParams.set(k, v);
@@ -248,7 +259,7 @@ export class WGData {
     if (json.status === 'error') {
       const err = json.error!;
 
-      console.log('failed to find profile', { params });
+      logger.warn({ params }, 'failed to find profile');
 
       throw new WGApiError(err.field, err.code, err.message);
     }
@@ -332,6 +343,8 @@ export class WGData {
     if (!vehicle) {
       throw new Error(`Vehicle not found: ${query}`);
     }
+
+    logger.debug({ tank_id: vehicle.tank_id, tag: vehicle.tag }, 'vehicle found');
 
     return vehicle;
   }
