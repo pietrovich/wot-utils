@@ -1,52 +1,71 @@
-SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_DIR="$SCRIPT_DIR/.."
-cd "$BASE_DIR"
 
 CLEAN=0
-SOURCE_DIR=""
+SRC=""
+OUT=""
 
-for arg in "$@"; do
-  case "$arg" in
-    --clean) CLEAN=1 ;;
-    *) SOURCE_DIR="${arg##/}" ;;
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --src) SRC="$2"; shift 2 ;;
+    --out) OUT="$2"; shift 2 ;;
+    --clean) CLEAN=1; shift ;;
+    *)
+      if [ -z "$SRC" ]; then
+        SRC="$1"
+      elif [ -z "$OUT" ]; then
+        OUT="$1"
+      else
+        echo "Error: unexpected argument: $1" >&2
+        exit 1
+      fi
+      shift
+      ;;
   esac
 done
 
-if [ -z "$SOURCE_DIR" ]; then
-  echo "Usage: $0 [--clean] <source-dir>" >&2
+if [ -z "$SRC" ] || [ -z "$OUT" ]; then
+  echo "Usage: $(basename "$0") [--clean] [--src] <src-dir> [--out] <out-dir>" >&2
   exit 1
 fi
 
-if [ ! -d "$SOURCE_DIR" ]; then
-  echo "Error: source directory not found: $SOURCE_DIR" >&2
+if [ ! -d "$SRC" ]; then
+  echo "Error: source directory not found: $SRC" >&2
   exit 1
 fi
+
+# Resolve to absolute paths before cd changes the working directory
+SRC="$(cd "$SRC" && pwd)"
+mkdir -p "$OUT"
+OUT="$(cd "$OUT" && pwd)"
+
+cd "$BASE_DIR"
 
 if [ "$CLEAN" -eq 1 ]; then
-  rm -rf ./out/atlases ./out/icons
-  find ./out -maxdepth 1 \( -name '*.png' -o -name '*.xml' -o -name '*.dds' \) -delete
+  rm -rf "$OUT/.build" "$OUT/gui"
+  find "$OUT" -maxdepth 1 \( -name '*.png' -o -name '*.xml' -o -name '*.dds' \) -delete
 fi
 
-if [ ! -f "$SOURCE_DIR/battleAtlas.png" ] && [ -f "$SOURCE_DIR/battleAtlas.dds" ]; then
-  npm -s start -- dds decode "$SOURCE_DIR/battleAtlas.dds"
+if [ ! -f "$SRC/battleAtlas.png" ] && [ -f "$SRC/battleAtlas.dds" ]; then
+  npm -s start -- dds decode "$SRC/battleAtlas.dds"
 fi
 
-if [ ! -f "$SOURCE_DIR/vehicleMarkerAtlas.png" ] && [ -f "$SOURCE_DIR/vehicleMarkerAtlas.dds" ]; then
-  npm -s start -- dds decode "$SOURCE_DIR/vehicleMarkerAtlas.dds"
+if [ ! -f "$SRC/vehicleMarkerAtlas.png" ] && [ -f "$SRC/vehicleMarkerAtlas.dds" ]; then
+  npm -s start -- dds decode "$SRC/vehicleMarkerAtlas.dds"
 fi
 
-if [ -d ./out/atlases/battleAtlas ]; then
-  echo "skipping battleAtlas extraction — ./out/atlases/battleAtlas already exists"
+if [ -d "$OUT/.build/atlases/battleAtlas" ]; then
+  echo "skipping battleAtlas extraction — $OUT/.build/atlases/battleAtlas already exists"
 else
-  npm -s start -- atlas extract --from "$SOURCE_DIR/battleAtlas" --to ./out/atlases/battleAtlas
-  cp -f "$SOURCE_DIR/battleAtlas.png" "$SOURCE_DIR/battleAtlas.xml" ./out/atlases/
+  npm -s start -- atlas extract --from "$SRC/battleAtlas" --to "$OUT/.build/atlases/battleAtlas"
+  cp -f "$SRC/battleAtlas.png" "$SRC/battleAtlas.xml" "$OUT/.build/atlases/"
 fi
 
-if [ -d ./out/atlases/vehicleMarkerAtlas ]; then
-  echo "skipping vehicleMarkerAtlas extraction — ./out/atlases/vehicleMarkerAtlas already exists"
+if [ -d "$OUT/.build/atlases/vehicleMarkerAtlas" ]; then
+  echo "skipping vehicleMarkerAtlas extraction — $OUT/.build/atlases/vehicleMarkerAtlas already exists"
 else
-  npm -s start -- atlas extract --from "$SOURCE_DIR/vehicleMarkerAtlas" --to ./out/atlases/vehicleMarkerAtlas
-  cp -f "$SOURCE_DIR/vehicleMarkerAtlas.png" "$SOURCE_DIR/vehicleMarkerAtlas.xml" ./out/atlases/
+  npm -s start -- atlas extract --from "$SRC/vehicleMarkerAtlas" --to "$OUT/.build/atlases/vehicleMarkerAtlas"
+  cp -f "$SRC/vehicleMarkerAtlas.png" "$SRC/vehicleMarkerAtlas.xml" "$OUT/.build/atlases/"
 fi
 
 echo "warm up vehicle data cache"
@@ -57,25 +76,28 @@ echo "warm up vehicle profile cache"
 PROFILES_COUNT="$(npm -s start -- vehicle stats --all --quiet --json | jq length)"
 echo "  $PROFILES_COUNT vehicles processed"
 
-ICONS_COUNT="$(find ./out/icons -maxdepth 1 -name '*.png' 2>/dev/null | wc -l)"
+ICONS_COUNT="$(find "$OUT/.build/icons" -maxdepth 1 -name '*.png' 2>/dev/null | wc -l)"
 
 if [ "$ICONS_COUNT" -ge "$VEHICLES_COUNT" ]; then
-  echo "skipping icons render — ./out/icons already has $ICONS_COUNT icons"
+  echo "skipping icons render — $OUT/.build/icons already has $ICONS_COUNT icons"
 else
   echo "generating icons"
-  npm -s start -- icon render --all --color --to ./out/icons --bg v1 --create
+  npm -s start -- icon render --all --color --to "$OUT/.build/icons" --bg v1 --create || exit 1
 fi
 
 echo "overlaying generated icons into atlas directories"
-rsync -a --include='*.png' --exclude='*' ./out/icons/ ./out/atlases/battleAtlas/
-rsync -a --include='*.png' --exclude='*' ./out/icons/ ./out/atlases/vehicleMarkerAtlas/
+rsync -a --include='*.png' --exclude='*' "$OUT/.build/icons/" "$OUT/.build/atlases/battleAtlas/"
+rsync -a --include='*.png' --exclude='*' "$OUT/.build/icons/" "$OUT/.build/atlases/vehicleMarkerAtlas/"
 
 echo "replacing suffixed variants with base icons"
-"$SCRIPT_DIR/replace-suffixed-with-base.sh" ./out/atlases/battleAtlas "$BASE_DIR/out/icons"
-"$SCRIPT_DIR/replace-suffixed-with-base.sh" ./out/atlases/vehicleMarkerAtlas "$BASE_DIR/out/icons"
+"$SCRIPT_DIR/replace-suffixed-with-base.sh" "$OUT/.build/atlases/battleAtlas" "$OUT/.build/icons"
+"$SCRIPT_DIR/replace-suffixed-with-base.sh" "$OUT/.build/atlases/vehicleMarkerAtlas" "$OUT/.build/icons"
 
-npm -s start -- atlas pack --src ./out/atlases/vehicleMarkerAtlas --to ./out/vehicleMarkerAtlas
-npm -s start -- atlas pack --src ./out/atlases/battleAtlas --to ./out/battleAtlas
+mkdir -p "$OUT/gui/flash/atlases"
+mkdir -p "$OUT/gui/flash/maps/icons/vehicle/contour/"
+npm -s start -- atlas pack --src "$OUT/.build/atlases/vehicleMarkerAtlas" --to "$OUT/gui/flash/atlases/vehicleMarkerAtlas"
+npm -s start -- atlas pack --src "$OUT/.build/atlases/battleAtlas" --to "$OUT/gui/flash/atlases/battleAtlas"
 
-mv ./out/battleAtlas.png ./out/battleAtlas.dds
-mv ./out/vehicleMarkerAtlas.png ./out/vehicleMarkerAtlas.dds
+mv "$OUT/gui/flash/atlases/battleAtlas.png" "$OUT/gui/flash/atlases/battleAtlas.dds"
+mv "$OUT/gui/flash/atlases/vehicleMarkerAtlas.png" "$OUT/gui/flash/atlases/vehicleMarkerAtlas.dds"
+rsync -a --include='*.png' --exclude='*' "$OUT/.build/icons/" "$OUT/gui/flash/maps/icons/vehicle/contour/"
