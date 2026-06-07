@@ -39,7 +39,10 @@ export function bakeCommand(): Command {
       const extraArgs = cmd.args.slice(1);
 
       try {
-        execFileSync('bash', [scriptPath, ...extraArgs], { stdio: 'inherit' });
+        execFileSync('bash', [scriptPath, ...extraArgs], {
+          stdio: 'inherit',
+          env: { ...process.env, PIE_WOT_CWD: process.cwd() },
+        });
       } catch (err) {
         process.exit((err as { status?: number }).status ?? 1);
       }

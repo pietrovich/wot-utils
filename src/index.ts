@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
-config();
+import { resolve } from 'node:path';
+config({ path: resolve(process.env.PIE_WOT_CWD ?? process.cwd(), '.env') });
 import { Command } from 'commander';
 import { WGData } from '~/lib/WGData.js';
 import { listVehiclesCommand } from '~/commands/vehicle/list.js';
