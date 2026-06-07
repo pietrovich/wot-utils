@@ -1,4 +1,4 @@
-import { loadFont } from '~/lib/fonts/load-font.js';
 import type { FontDefinition } from '~/lib/PixelFont.js';
+import data from './pogs/4px.json5';
 
-export const pogs4px: FontDefinition = loadFont(new URL('./pogs/4px.json5', import.meta.url));
+export const pogs4px = data as FontDefinition;
