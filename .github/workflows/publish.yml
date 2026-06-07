@@ -59,7 +59,7 @@ jobs:
       # actions/create-github-app-token@v1 to generate a token for checkout and push.
       # See: https://github.com/orgs/community/discussions/25305#discussioncomment-8256560
       - name: Push commit and tag
-        run: git push --follow-tags
+        run: git push && git push --tags
 
       - name: Publish
         run: npm publish
