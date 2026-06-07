@@ -7,22 +7,18 @@ The long-term goal is to make it trivial to maintain and publish a custom icon s
 ## Install
 
 ```bash
-git clone https://github.com/pietrovich/wot-utils.git
-cd wot-utils
-npm install
-npm run build         # compile to dist/
-npm link              # registers pie-wot in your PATH
+npm install -g @pietrovich/pie-wot-utils
 cp .env.example .env  # add your WG_APP_ID
 ```
 
 Get a free application ID at [developers.wargaming.net](https://developers.wargaming.net/).
 
-> **Node.js ≥ 24** required. No build step — `tsx` runs TypeScript directly.
+> **Node.js ≥ 24** required.
 
 ## Uninstall
 
 ```bash
-npm unlink -g pie-wot-utils   # removes pie-wot from PATH
+npm uninstall -g @pietrovich/pie-wot-utils
 ```
 
 ## Commands
