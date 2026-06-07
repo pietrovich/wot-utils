@@ -6,11 +6,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Never commit anything unless the user explicitly asks to.
 
+## Collaboration
+
+When a direct instruction seems wrong, redundant, or improvable — say so and ask for confirmation before doing anything differently. Never silently substitute a reduced or altered version. Surfacing concerns is good; acting on them unilaterally is not.
+
 ## Commit messages
 
 Focus on the *why* — what problem is solved or what capability is added. Implementation
 details (data structures, method names, algorithmic choices) belong in the diff, not the
 message. One concise sentence or short paragraph is enough.
+
+Never add a `Co-Authored-By` trailer or any other AI attribution footer to commit messages.
+
+For commits where AI assistance produced the actual code changes (not just commit message
+wording or routine git operations), append `[AI:Claude]` to the title line:
+
+```
+Add atlas extraction scripts for Linux and Windows [AI:Claude]
+```
+
+"Assisted" means Claude wrote or substantially modified source files. Drafting the commit
+message, formatting, running git commands, or invoking auto-formatting/linting tools
+(eslint --fix, prettier, etc.) does not count — even if those tools touch many files.
 
 ## Pull request descriptions
 
@@ -25,8 +42,36 @@ Short description of what was added or changed and why.
 - [x] key observable behaviour to verify
 ```
 
+## Coding standards
+
+Always use curly braces for every `if`, `else`, `for`, `while`, and similar block — even when the body is a single statement. No brace-free one-liners. This matches the project's `curly: all` ESLint rule and avoids the class of bugs that creep in when a second line gets added later.
+
+One class per file where possible. Don't bundle multiple classes into a single module.
+
+File naming follows what the file contains. Files that export a class use PascalCase matching the class name (e.g. `BackgroundFactory.ts` for `class BackgroundFactory`). Everything else — utilities, functions, constants, registries — uses kebab-case.
+
 **Do not read or analyse gitignored directories** (`./samples`, `./notes`, `./.data`, `./.wg-data`, etc.). Only read a
 specific file from those locations if the user explicitly points to it.
+
+**Image compositing must use `sharp.composite()`** — never manual per-pixel blending loops. `sharp` is already a
+dependency and handles alpha blending, positioning, and opacity correctly and efficiently. If a task feels like manual
+blending might be more appropriate (e.g. tight inner loop on a tiny synthetic buffer where pulling in a full sharp
+pipeline seems like overkill), ask before reaching for manual blending.
+
+**To control layer opacity, use `applyAlpha(buffer, opacity)` from `~/lib/utils.ts`** before passing the buffer to
+`sharp.composite()`. `sharp.composite()` has no built-in opacity option — alpha must be pre-multiplied on the input
+buffer directly.
+
+**Prefer a single return over early-return + late-return.** When a fast path and a slow path produce the same type, use the lookup→check→compute→return shape:
+```ts
+let result = cache.get(key);
+if (result === undefined) {
+  result = /* compute */;
+  cache.set(key, result);
+}
+return result;
+```
+Not an early `return cache.get(key)!` followed by a second `return result` at the end.
 
 ## Commands
 
@@ -55,7 +100,7 @@ No build step is required — `tsx` runs TypeScript directly.
 ```
 pie-wot vehicle list              # list WoT encyclopedia vehicles (table by default)
 pie-wot vehicle export            # save vehicles JSON to file
-pie-wot vehicle fetch-icons       # download vehicle icons
+pie-wot icon fetch [query]         # download vehicle icons (all, or one by query)
 pie-wot vehicle stats             # short-name character statistics
 pie-wot vehicle best-config       # best module config per vehicle
 pie-wot vehicle chars             # character distribution in short names
@@ -86,7 +131,7 @@ WG_CACHE_DIR=.data/cache   # optional, this is the default
 ```
 src/
   index.ts                        # CLI entry — commander setup, command tree, argv parse
-  app.ts                          # App class — WG API + cache wiring
+  WGData.ts                       # WGData class — WG API + cache wiring
   types.ts                        # Vehicle, VehiclesData, WGApiResponse<T>
   commands/
     vehicle/
@@ -110,15 +155,18 @@ src/
     cache.ts                      # file-based cache — getCached/setCached/purgeCache
     config.ts                     # getAppId() — reads WG_APP_ID with --app-id override
     format.ts                     # printJson() / printVehiclesTable()
-    atlas-manager.ts              # AtlasManager — listNames, pick, extractAll, pack
+    AtlasManager.ts               # AtlasManager — listNames, pick, extractAll, pack
     texture-atlas.ts              # readTextureAtlas(xmlPath) → TextureRegion[]
-    pixel-font.ts                 # PixelFont class, Font type, 4-level alpha encoding
-    png.ts                        # minimal PNG encoder (node:zlib only, RGB)
+    PixelFont.ts                  # PixelFont class, Font type, 4-level alpha encoding
+    render-text.ts                # renderText(fontName, text, color?) → RenderedText (RGBA buffer)
     fonts/
       index.ts                    # fonts registry: Record<string, Font>
       monaco.ts                   # Monaco 8px font definition
       font8.ts                    # font8 definition
       minecraft.ts                # Minecraft bitmap font definition
+    icons/
+      BackgroundFactory.ts        # BackgroundFactory — generates per-type gradient + shield backgrounds
+      background-colors.ts        # bgColors — gradient row data per vehicle type
 tests/                            # vitest tests mirroring src/lib/
 ```
 
@@ -133,9 +181,6 @@ named import `{ MaxRectsPacker }`).
 
 **PixelFont:** `Font = Record<string, string[]>`. Four alpha levels: `' '`=0x00, `'-'`=0x40, `'+'`=0xBF, `'X'`=0xFF.
 `getPixels()` is memoized with a `Map`.
-
-**`src/lib/png.ts`:** minimal PNG encoder using only `node:zlib` (RGB color type). Used by `font render`. Atlas commands
-use `pngjs` for full decode/encode.
 
 **Path alias:** `~` maps to `./src` in both `tsconfig.json` (`paths`) and `vitest.config.ts` (`resolve.alias`). Use
 `~/lib/foo.js` style in all imports.

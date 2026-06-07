@@ -31,31 +31,31 @@ type BitPos = { boff: number };
 
 export class DDSUtils {
   // ── DDS header flags ────────────────────────────────────────────────────────
-  static DDSD_CAPS        = 0x1;       // always required
-  static DDSD_HEIGHT      = 0x2;       // always required
-  static DDSD_WIDTH       = 0x4;       // always required
-  static DDSD_PIXELFORMAT = 0x1000;    // always required
+  static DDSD_CAPS = 0x1; // always required
+  static DDSD_HEIGHT = 0x2; // always required
+  static DDSD_WIDTH = 0x4; // always required
+  static DDSD_PIXELFORMAT = 0x1000; // always required
   static DDSD_MIPMAPCOUNT = 0x20000;
-  static DDSD_LINEARSIZE  = 0x80000;
+  static DDSD_LINEARSIZE = 0x80000;
 
   // ── DDS pixel format flags ──────────────────────────────────────────────────
   static DDPF_ALPHAPIXELS = 0x1;
-  static DDPF_ALPHA       = 0x2;
-  static DDPF_FOURCC      = 0x4;
-  static DDPF_RGB         = 0x40;
-  static DDPF_LUMINANCE   = 0x20000;
+  static DDPF_ALPHA = 0x2;
+  static DDPF_FOURCC = 0x4;
+  static DDPF_RGB = 0x40;
+  static DDPF_LUMINANCE = 0x20000;
 
   // ── DDS caps flags ──────────────────────────────────────────────────────────
-  static DDSCAPS_COMPLEX  = 0x8;
-  static DDSCAPS_MIPMAP   = 0x400000;
-  static DDSCAPS_TEXTURE  = 0x1000;
+  static DDSCAPS_COMPLEX = 0x8;
+  static DDSCAPS_MIPMAP = 0x400000;
+  static DDSCAPS_TEXTURE = 0x1000;
 
   // Reusable scratch buffers — allocated once per instance to avoid per-call
   // heap pressure in tight decode/encode loops. WARNING: contents are not
   // cleared between calls; never hold a reference to these across method
   // invocations or assume they are zero-initialised on entry.
-  _int8  = new Uint8Array(4);
-  _int   = new Uint32Array(this._int8.buffer); // shares memory with _int8 for LE uint32 reinterpretation
+  _int8 = new Uint8Array(4);
+  _int = new Uint32Array(this._int8.buffer); // shares memory with _int8 for LE uint32 reinterpretation
   _arr16 = new Uint8Array(16); // 4-color palette slot for readBCcolor (16 RGBA entries × 1 byte)
 
   // ── public API ──────────────────────────────────────────────────────────────
@@ -95,10 +95,16 @@ export class DDSUtils {
         throw new Error('Not supported: ATCI');
       } else if (pf.flags & DDSUtils.DDPF_ALPHAPIXELS && pf.flags & DDSUtils.DDPF_RGB) {
         throw new Error('Not supported: (complex-A)');
-      } else if (pf.flags & DDSUtils.DDPF_ALPHA || pf.flags & DDSUtils.DDPF_ALPHAPIXELS || pf.flags & DDSUtils.DDPF_LUMINANCE) {
+      } else if (
+        pf.flags & DDSUtils.DDPF_ALPHA ||
+        pf.flags & DDSUtils.DDPF_ALPHAPIXELS ||
+        pf.flags & DDSUtils.DDPF_LUMINANCE
+      ) {
         throw new Error('Not supported: (complex-B)');
       } else {
-        throw new Error(`Unknown texture format — head flags: ${head.flags.toString(2)}, pixelFormat flags: ${pf.flags.toString(2)}`);
+        throw new Error(
+          `Unknown texture format — head flags: ${head.flags.toString(2)}, pixelFormat flags: ${pf.flags.toString(2)}`,
+        );
       }
 
       out.push({ width: w, height: h, image: img.buffer });
@@ -574,15 +580,21 @@ export class DDSUtils {
       var a = sqr[i + 3];
 
       if (rot == 1) {
-        var t = a; a = r; r = t;
+        var t = a;
+        a = r;
+        r = t;
       }
 
       if (rot == 2) {
-        var t = a; a = g; g = t;
+        var t = a;
+        a = g;
+        g = t;
       }
 
       if (rot == 3) {
-        var t = a; a = b; b = t;
+        var t = a;
+        a = b;
+        b = t;
       }
 
       sqr[i] = r;

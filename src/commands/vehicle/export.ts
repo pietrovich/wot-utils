@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { WGApiError } from '~/lib/api.js';
-import type { App } from '~/app.js';
+import type { WGData } from '~/lib/WGData.js';
 
-export function exportCommand(app: App): Command {
+export function exportCommand(app: WGData): Command {
   return new Command('export')
     .description('Export all vehicles to a JSON file')
     .option('--output <path>', 'output file path (default: wg-export-<timestamp>.json)')

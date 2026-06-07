@@ -44,6 +44,7 @@ pie-wot dds decode <file>         # decode a DDS texture to PNG
 pie-wot dds encode <file>         # encode a PNG to DXT5/BC3 DDS
 
 pie-wot icon dump-background      # generate per-type background images (PogS style)
+pie-wot icon render <query>       # render a vehicle icon: type background + short name label
 
 pie-wot font render [font] [text] # render text as PNG using a pixel font
 

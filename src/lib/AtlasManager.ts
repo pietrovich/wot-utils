@@ -84,9 +84,7 @@ export class AtlasManager {
   }
 
   async pack(srcDir: string, { padding = 0, maxWidth = 4096 }: PackOptions = {}): Promise<PackResult> {
-    const files = (await readdir(srcDir))
-      .filter((f) => extname(f).toLowerCase() === '.png')
-      .sort();
+    const files = (await readdir(srcDir)).filter((f) => extname(f).toLowerCase() === '.png').sort();
 
     if (files.length === 0) {
       throw new Error(`No PNG files found in ${srcDir}`);

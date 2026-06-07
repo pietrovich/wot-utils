@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { writeFile } from 'node:fs/promises';
 import { PNG } from 'pngjs';
-import { AtlasManager } from '~/lib/atlas-manager.js';
+import { AtlasManager } from '~/lib/AtlasManager.js';
 
 export function pickCommand(atlas: AtlasManager): Command {
   return new Command('pick')

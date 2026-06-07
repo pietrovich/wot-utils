@@ -7,7 +7,10 @@ import { DDSUtils } from '../../../src/lib/utex-mod/DDSUtils.js';
 function solidBlock(r, g, b, a = 255) {
   const buf = new Uint8Array(64);
   for (let i = 0; i < 64; i += 4) {
-    buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = a;
+    buf[i] = r;
+    buf[i + 1] = g;
+    buf[i + 2] = b;
+    buf[i + 3] = a;
   }
 
   return buf;
@@ -16,7 +19,7 @@ function solidBlock(r, g, b, a = 255) {
 /** Assert every pixel in a 4×4 RGBA output equals the expected values. */
 function expectAllPixels(img, r, g, b, a = 255) {
   for (let i = 0; i < 64; i += 4) {
-    expect(img[i],     `pixel ${i / 4} R`).toBe(r);
+    expect(img[i], `pixel ${i / 4} R`).toBe(r);
     expect(img[i + 1], `pixel ${i / 4} G`).toBe(g);
     expect(img[i + 2], `pixel ${i / 4} B`).toBe(b);
     expect(img[i + 3], `pixel ${i / 4} A`).toBe(a);
@@ -26,8 +29,8 @@ function expectAllPixels(img, r, g, b, a = 255) {
 /** Assert every pixel is within `tol` of the expected values. */
 function expectAllPixelsApprox(img, r, g, b, a = 255, tol = 8) {
   for (let i = 0; i < 64; i += 4) {
-    expect(img[i],     `pixel ${i / 4} R`).toBeGreaterThanOrEqual(r - tol);
-    expect(img[i],     `pixel ${i / 4} R`).toBeLessThanOrEqual(r + tol);
+    expect(img[i], `pixel ${i / 4} R`).toBeGreaterThanOrEqual(r - tol);
+    expect(img[i], `pixel ${i / 4} R`).toBeLessThanOrEqual(r + tol);
     expect(img[i + 1], `pixel ${i / 4} G`).toBeGreaterThanOrEqual(g - tol);
     expect(img[i + 1], `pixel ${i / 4} G`).toBeLessThanOrEqual(g + tol);
     expect(img[i + 2], `pixel ${i / 4} B`).toBeGreaterThanOrEqual(b - tol);
@@ -48,17 +51,19 @@ function expectAllPixelsApprox(img, r, g, b, a = 255, tol = 8) {
 
 // Solid-color BC1 blocks (c0 = color, c1 = 0, all indices = 0 → every pixel = c0).
 // c0 > c1 (0 < c0), so 4-color mode is active and index 0 always picks c0.
-const BC1_RED   = new Uint8Array([0x00, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0xF800
-const BC1_GREEN = new Uint8Array([0xE0, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0x07E0
-const BC1_BLUE  = new Uint8Array([0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0x001F
-const BC1_WHITE = new Uint8Array([0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0xFFFF
-const BC1_BLACK = new Uint8Array([0xFF, 0xFF, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55]); // all indices=1 → c1=0
+const BC1_RED = new Uint8Array([0x00, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0xF800
+const BC1_GREEN = new Uint8Array([0xe0, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0x07E0
+const BC1_BLUE = new Uint8Array([0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0x001F
+const BC1_WHITE = new Uint8Array([0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]); // c0=0xFFFF
+const BC1_BLACK = new Uint8Array([0xff, 0xff, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55]); // all indices=1 → c1=0
 
 // ─── tests ──────────────────────────────────────────────────────────────────
 
 describe('Utex', () => {
   let utex;
-  beforeEach(() => { utex = new DDSUtils(); });
+  beforeEach(() => {
+    utex = new DDSUtils();
+  });
 
   // ── inter8 ────────────────────────────────────────────────────────────────
 
@@ -79,12 +84,12 @@ describe('Utex', () => {
 
     it('a > b: interpolates 6 values between endpoints', () => {
       const al = utex.inter8(255, 0);
-      expect(al[2]).toBeCloseTo(6 / 7 * 255, 5);
-      expect(al[3]).toBeCloseTo(5 / 7 * 255, 5);
-      expect(al[4]).toBeCloseTo(4 / 7 * 255, 5);
-      expect(al[5]).toBeCloseTo(3 / 7 * 255, 5);
-      expect(al[6]).toBeCloseTo(2 / 7 * 255, 5);
-      expect(al[7]).toBeCloseTo(1 / 7 * 255, 5);
+      expect(al[2]).toBeCloseTo((6 / 7) * 255, 5);
+      expect(al[3]).toBeCloseTo((5 / 7) * 255, 5);
+      expect(al[4]).toBeCloseTo((4 / 7) * 255, 5);
+      expect(al[5]).toBeCloseTo((3 / 7) * 255, 5);
+      expect(al[6]).toBeCloseTo((2 / 7) * 255, 5);
+      expect(al[7]).toBeCloseTo((1 / 7) * 255, 5);
     });
 
     it('a <= b: first two values are a and b', () => {
@@ -95,7 +100,7 @@ describe('Utex', () => {
 
     it('a <= b: interpolates 4 values, then fixed 0 and 255', () => {
       const al = utex.inter8(0, 255);
-      expect(al[2]).toBeCloseTo(51,  5); // 1/5 * 255
+      expect(al[2]).toBeCloseTo(51, 5); // 1/5 * 255
       expect(al[3]).toBeCloseTo(102, 5); // 2/5 * 255
       expect(al[4]).toBeCloseTo(153, 5); // 3/5 * 255
       expect(al[5]).toBeCloseTo(204, 5); // 4/5 * 255
@@ -113,7 +118,7 @@ describe('Utex', () => {
 
     it('both endpoints 0: all values 0 except the fixed 255 sentinel', () => {
       const al = utex.inter8(0, 0);
-      expect(al.slice(0, 6).every(v => v === 0)).toBe(true);
+      expect(al.slice(0, 6).every((v) => v === 0)).toBe(true);
       expect(al[7]).toBe(255);
     });
   });
@@ -128,20 +133,20 @@ describe('Utex', () => {
     });
 
     it('reads 1 from a 0xFF byte', () => {
-      const data = new Uint8Array([0xFF]);
+      const data = new Uint8Array([0xff]);
       const pos = { boff: 0 };
       expect(utex.readBit(data, pos)).toBe(1);
     });
 
     it('advances pos.boff by 1 each call', () => {
-      const data = new Uint8Array([0xFF]);
+      const data = new Uint8Array([0xff]);
       const pos = { boff: 3 };
       utex.readBit(data, pos);
       expect(pos.boff).toBe(4);
     });
 
     it('reads individual bits of a known byte (0b10110100 = 0xB4)', () => {
-      const data = new Uint8Array([0xB4]); // 1011 0100
+      const data = new Uint8Array([0xb4]); // 1011 0100
       const expected = [0, 0, 1, 0, 1, 1, 0, 1]; // LSB first
       const pos = { boff: 0 };
       for (const bit of expected) {
@@ -151,7 +156,7 @@ describe('Utex', () => {
 
     it('reads across byte boundary', () => {
       // byte0=0x00, byte1=0xFF
-      const data = new Uint8Array([0x00, 0xFF]);
+      const data = new Uint8Array([0x00, 0xff]);
       const pos = { boff: 7 };
       expect(utex.readBit(data, pos)).toBe(0); // bit 7 of byte 0
       expect(utex.readBit(data, pos)).toBe(1); // bit 0 of byte 1
@@ -165,7 +170,7 @@ describe('Utex', () => {
     });
 
     it('reads max value (2^k-1) when all bits are 1', () => {
-      const data = new Uint8Array([0xFF]);
+      const data = new Uint8Array([0xff]);
       expect(utex.readBits(data, { boff: 0 }, 4)).toBe(15);
       expect(utex.readBits(data, { boff: 0 }, 3)).toBe(7);
     });
@@ -188,7 +193,7 @@ describe('Utex', () => {
     });
 
     it('advances pos.boff by k', () => {
-      const data = new Uint8Array([0xFF]);
+      const data = new Uint8Array([0xff]);
       const pos = { boff: 1 };
       utex.readBits(data, pos, 3);
       expect(pos.boff).toBe(4);
@@ -230,18 +235,21 @@ describe('Utex', () => {
     it('identifies the pair of pixels furthest apart in RGB space', () => {
       // pixel 0 (offset 0) = red, pixel 1 (offset 4) = blue; all others = black
       const sqr = new Uint8Array(64);
-      sqr[0] = 255;             // pixel 0: red
-      sqr[4 + 2] = 255;        // pixel 1: blue
+      sqr[0] = 255; // pixel 0: red
+      sqr[4 + 2] = 255; // pixel 1: blue
       // dist(red, blue) = 255²+255² = 130050 > any other pair
       const result = utex.mostDistant(sqr);
-      expect(result >> 8).toBe(0);  // first pixel offset
+      expect(result >> 8).toBe(0); // first pixel offset
       expect(result & 255).toBe(4); // second pixel offset
     });
 
     it('packed result encodes (i<<8)|j where i < j', () => {
       const sqr = new Uint8Array(64);
       // pixel 3 (offset 12) = white, pixel 15 (offset 60) = black → dist = 255²*3
-      sqr[12] = 255; sqr[13] = 255; sqr[14] = 255; sqr[15] = 255;
+      sqr[12] = 255;
+      sqr[13] = 255;
+      sqr[14] = 255;
+      sqr[15] = 255;
       const result = utex.mostDistant(sqr);
       const i = result >> 8;
       const j = result & 255;
@@ -255,7 +263,10 @@ describe('Utex', () => {
     function makeColorBlock(r, g, b, a) {
       const sqr = new Uint8Array(64);
       for (let i = 0; i < 64; i += 4) {
-        sqr[i] = r; sqr[i + 1] = g; sqr[i + 2] = b; sqr[i + 3] = a;
+        sqr[i] = r;
+        sqr[i + 1] = g;
+        sqr[i + 2] = b;
+        sqr[i + 3] = a;
       }
 
       return sqr;
@@ -319,12 +330,15 @@ describe('Utex', () => {
     it('2×2 all-opaque single color collapses to the same color', () => {
       // 2×2 all-red, fully opaque — mipmapB takes a Uint8Array, not ArrayBuffer
       const buf = new Uint8Array(2 * 2 * 4);
-      for (let i = 0; i < buf.length; i += 4) { buf[i] = 255; buf[i + 3] = 255; }
+      for (let i = 0; i < buf.length; i += 4) {
+        buf[i] = 255;
+        buf[i + 3] = 255;
+      }
 
       const result = utex.mipmapB(buf, 2, 2);
       expect(result[0]).toBe(255); // R
-      expect(result[1]).toBe(0);   // G
-      expect(result[2]).toBe(0);   // B
+      expect(result[1]).toBe(0); // G
+      expect(result[2]).toBe(0); // B
       expect(result[3]).toBe(255); // A
     });
 
@@ -340,10 +354,22 @@ describe('Utex', () => {
     it('2×2 opaque block: averages colors correctly', () => {
       // 4 pixels: red, green, blue, yellow — all fully opaque
       const buf = new Uint8Array([
-        255, 0,   0,   255, // red
-        0,   255, 0,   255, // green
-        0,   0,   255, 255, // blue
-        255, 255, 0,   255, // yellow
+        255,
+        0,
+        0,
+        255, // red
+        0,
+        255,
+        0,
+        255, // green
+        0,
+        0,
+        255,
+        255, // blue
+        255,
+        255,
+        0,
+        255, // yellow
       ]);
       const result = utex.mipmapB(buf, 2, 2);
       // R: (255*255 + 0*255 + 0*255 + 255*255) / (4*255) = 510/4 ≈ 127.5 → 128
@@ -373,13 +399,13 @@ describe('Utex', () => {
 
     it('write at non-zero origin does not touch other pixels', () => {
       const large = new Uint8Array(8 * 8 * 4);
-      large.fill(0xAB); // fill with sentinel
+      large.fill(0xab); // fill with sentinel
       const src = solidBlock(1, 2, 3, 4);
 
       utex.write4x4(large, 8, 8, 4, 4, src); // write at (4,4)
 
       // pixel (0,0) should still be sentinel
-      expect(large[0]).toBe(0xAB);
+      expect(large[0]).toBe(0xab);
       // pixel (4,4) should be our color
       const offset = (4 * 8 + 4) * 4;
       expect(large[offset]).toBe(1);
@@ -501,7 +527,7 @@ describe('Utex', () => {
 
     it('decodes fully opaque red block (all alpha nibbles = 0xF)', () => {
       const block = new Uint8Array(16);
-      block.fill(0xFF, 0, 8); // all alpha nibbles = 15 → alpha = 255*(15/15) = 255
+      block.fill(0xff, 0, 8); // all alpha nibbles = 15 → alpha = 255*(15/15) = 255
       block.set(BC1_RED, 8);
       const img = new Uint8Array(64);
       utex.readBC2(block, 0, img, 4, 4);
@@ -537,7 +563,8 @@ describe('Utex', () => {
     it('decodes fully opaque red block (alpha0=255, alpha1=0, all indices=0)', () => {
       // inter8(255,0) → al[0]=255; all indices=0 → every pixel alpha=255
       const block = new Uint8Array(16);
-      block[0] = 0xFF; block[1] = 0x00;
+      block[0] = 0xff;
+      block[1] = 0x00;
       // bytes 2-7: all zero (all indices = 0)
       block.set(BC1_RED, 8);
       const img = new Uint8Array(64);
@@ -548,7 +575,8 @@ describe('Utex', () => {
     it('decodes fully transparent red block (alpha0=0, alpha1=0, all indices=0)', () => {
       // inter8(0,0) → al[0]=0; all indices=0 → every pixel alpha=0
       const block = new Uint8Array(16);
-      block[0] = 0x00; block[1] = 0x00;
+      block[0] = 0x00;
+      block[1] = 0x00;
       block.set(BC1_RED, 8);
       const img = new Uint8Array(64);
       utex.readBC3(block, 0, img, 4, 4);
@@ -559,7 +587,8 @@ describe('Utex', () => {
       // alpha0=0, alpha1=255 → inter8(0,255): al[6]=0 (reserved), al[7]=255
       // all indices=0 → al[0]=0 → every pixel alpha=0
       const block = new Uint8Array(16);
-      block[0] = 0x00; block[1] = 0xFF;
+      block[0] = 0x00;
+      block[1] = 0xff;
       block.set(BC1_RED, 8);
       const img = new Uint8Array(64);
       utex.readBC3(block, 0, img, 4, 4);

@@ -1,4 +1,6 @@
 export type VehicleType = 'lightTank' | 'mediumTank' | 'heavyTank' | 'AT-SPG' | 'SPG';
+export type WGVehicleImageSize = 'small' | 'medium' | 'large';
+export type VehicleIconSize = WGVehicleImageSize | 'xs';
 export type Nation =
   | 'ussr'
   | 'germany'

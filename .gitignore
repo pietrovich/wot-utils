@@ -8,6 +8,8 @@ dist/
 *.js.map
 
 notes/
-*.png
+#*.png
 samples/
 coverage/
+in/
+out/
