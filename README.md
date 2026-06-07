@@ -101,3 +101,9 @@ API responses are cached locally (SHA-256 keyed, no TTL) so repeated runs don't 
 
 - Gradient data and assets for the PogS icon style ported from [WoT-PogsIconSet](https://github.com/pavelmaca/WoT-PogsIconSet) by [@pavelmaca](https://github.com/pavelmaca)
 - DDS codec derived from [photopea/UTEX.js](https://github.com/photopea/UTEX.js) by the Photopea team
+
+---
+
+GL, HF
+
+[![wtfpl-badge-2.png](wtfpl-badge-2.png)](./LICENSE)
