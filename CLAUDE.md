@@ -16,6 +16,19 @@ Focus on the *why* — what problem is solved or what capability is added. Imple
 details (data structures, method names, algorithmic choices) belong in the diff, not the
 message. One concise sentence or short paragraph is enough.
 
+Never add a `Co-Authored-By` trailer or any other AI attribution footer to commit messages.
+
+For commits where AI assistance produced the actual code changes (not just commit message
+wording or routine git operations), append `[AI:Claude]` to the title line:
+
+```
+Add atlas extraction scripts for Linux and Windows [AI:Claude]
+```
+
+"Assisted" means Claude wrote or substantially modified source files. Drafting the commit
+message, formatting, running git commands, or invoking auto-formatting/linting tools
+(eslint --fix, prettier, etc.) does not count — even if those tools touch many files.
+
 ## Pull request descriptions
 
 Describe the *result* — what the user gets and why it matters. Do not narrate
