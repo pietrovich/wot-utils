@@ -2,8 +2,24 @@
 # baker-lib.sh — shared build step functions for icon bake scripts.
 # Source this file; do not execute it directly.
 
+_CWD=$(pwd)
 _LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _BASE_DIR="$_LIB_DIR/.."
+
+# Load .env from cwd if present (picks up LOCAL_DEV and similar vars).
+if [ -f "$_CWD/.env" ]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$_CWD/.env"
+  set +a
+fi
+
+# Resolve CLI: LOCAL_DEV forces npm-start (dev clone), otherwise use installed binary.
+if [ -n "${LOCAL_DEV:-}" ] || ! command -v pie-wot >/dev/null 2>&1; then
+  PIE_WOT=(npm -s start --prefix="$_BASE_DIR" --)
+else
+  PIE_WOT=(pie-wot)
+fi
 
 # Shared state — set by parse_args, consumed by step functions.
 CLEAN=0
@@ -56,10 +72,10 @@ clean_build() {
 
 decode_dds() {
   if [ ! -f "$SRC/battleAtlas.png" ] && [ -f "$SRC/battleAtlas.dds" ]; then
-    npm -s start -- dds decode "$SRC/battleAtlas.dds"
+    "${PIE_WOT[@]}" dds decode "$SRC/battleAtlas.dds"
   fi
   if [ ! -f "$SRC/vehicleMarkerAtlas.png" ] && [ -f "$SRC/vehicleMarkerAtlas.dds" ]; then
-    npm -s start -- dds decode "$SRC/vehicleMarkerAtlas.dds"
+    "${PIE_WOT[@]}" dds decode "$SRC/vehicleMarkerAtlas.dds"
   fi
 }
 
@@ -67,26 +83,26 @@ extract_atlases() {
   if [ -d "$BUILD/atlases/battleAtlas" ]; then
     echo "skipping battleAtlas extraction — $BUILD/atlases/battleAtlas already exists"
   else
-    npm -s start -- atlas extract --from "$SRC/battleAtlas" --to "$BUILD/atlases/battleAtlas"
+    "${PIE_WOT[@]}" atlas extract --from "$SRC/battleAtlas" --to "$BUILD/atlases/battleAtlas"
     cp -f "$SRC/battleAtlas.png" "$SRC/battleAtlas.xml" "$BUILD/atlases/"
   fi
 
   if [ -d "$BUILD/atlases/vehicleMarkerAtlas" ]; then
     echo "skipping vehicleMarkerAtlas extraction — $BUILD/atlases/vehicleMarkerAtlas already exists"
   else
-    npm -s start -- atlas extract --from "$SRC/vehicleMarkerAtlas" --to "$BUILD/atlases/vehicleMarkerAtlas"
+    "${PIE_WOT[@]}" atlas extract --from "$SRC/vehicleMarkerAtlas" --to "$BUILD/atlases/vehicleMarkerAtlas"
     cp -f "$SRC/vehicleMarkerAtlas.png" "$SRC/vehicleMarkerAtlas.xml" "$BUILD/atlases/"
   fi
 }
 
 warm_cache() {
   echo "warm up vehicle data cache"
-  VEHICLES_COUNT="$(npm -s start -- vehicle list --all --json 2>/dev/null | jq length)"
+  VEHICLES_COUNT="$("${PIE_WOT[@]}" vehicle list --all --json 2>/dev/null | jq length)"
   echo "  $VEHICLES_COUNT vehicles processed"
 
   echo "warm up vehicle profile cache"
   local profiles_count
-  profiles_count="$(npm -s start -- vehicle stats --all --quiet --json | jq length)"
+  profiles_count="$("${PIE_WOT[@]}" vehicle stats --all --quiet --json | jq length)"
   echo "  $profiles_count vehicles processed"
 }
 
@@ -103,7 +119,7 @@ render_icons() {
 
   echo "generating icons"
   mkdir -p "$BUILD/icons"
-  npm -s start -- icon render --all --to "$BUILD/icons" "$@" || return 1
+  "${PIE_WOT[@]}" icon render --all --to "$BUILD/icons" "$@" || return 1
 }
 
 overlay_icons() {
@@ -120,8 +136,8 @@ replace_suffixed() {
 
 pack_atlases() {
   mkdir -p "$OUT/gui/flash/atlases"
-  npm -s start -- atlas pack --src "$BUILD/atlases/vehicleMarkerAtlas" --to "$OUT/gui/flash/atlases/vehicleMarkerAtlas"
-  npm -s start -- atlas pack --src "$BUILD/atlases/battleAtlas" --to "$OUT/gui/flash/atlases/battleAtlas"
+  "${PIE_WOT[@]}" atlas pack --src "$BUILD/atlases/vehicleMarkerAtlas" --to "$OUT/gui/flash/atlases/vehicleMarkerAtlas"
+  "${PIE_WOT[@]}" atlas pack --src "$BUILD/atlases/battleAtlas" --to "$OUT/gui/flash/atlases/battleAtlas"
   mv "$OUT/gui/flash/atlases/battleAtlas.png" "$OUT/gui/flash/atlases/battleAtlas.dds"
   mv "$OUT/gui/flash/atlases/vehicleMarkerAtlas.png" "$OUT/gui/flash/atlases/vehicleMarkerAtlas.dds"
 }

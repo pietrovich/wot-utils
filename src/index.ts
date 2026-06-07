@@ -1,7 +1,5 @@
-import { resolve } from 'node:path';
 import { config } from 'dotenv';
-import { findPkgRoot } from '~/lib/pkg-root.js';
-config({ path: resolve(findPkgRoot(new URL(import.meta.url)), '.env') });
+config();
 import { Command } from 'commander';
 import { WGData } from '~/lib/WGData.js';
 import { listVehiclesCommand } from '~/commands/vehicle/list.js';
@@ -25,13 +23,18 @@ import { iconFetchCommand } from '~/commands/icon/fetch.js';
 import { iconShrinkCommand } from '~/commands/icon/shrink.js';
 import { TomatoApi } from '~/lib/tomato-api.js';
 import { tomatoFetchCommand } from '~/commands/tomato/fetch.js';
+import { bakeCommand } from '~/commands/bake/run.js';
 
 const app = new WGData();
 const atlasManager = new AtlasManager();
 const tomatoApi = new TomatoApi();
 const program = new Command();
 
-program.name('pie-wot').description('CLI utilities for World of Tanks data and assets').version('0.1.0');
+program
+  .name('pie-wot')
+  .description('CLI utilities for World of Tanks data and assets')
+  .version('0.1.0')
+  .enablePositionalOptions();
 
 const vehicle = new Command('vehicle').description('WoT vehicle data');
 vehicle.addCommand(listVehiclesCommand(app));
@@ -73,5 +76,7 @@ program.addCommand(icon);
 const tomato = new Command('tomato').description('Tomato.gg data fetcher');
 tomato.addCommand(tomatoFetchCommand(app, tomatoApi));
 program.addCommand(tomato);
+
+program.addCommand(bakeCommand());
 
 await program.parseAsync();

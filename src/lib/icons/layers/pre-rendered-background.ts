@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import sharp from 'sharp';
 import type { LayerFactory, LayerRenderResult } from '~/lib/icons/layer-factory.js';
-import { findPkgRoot } from '~/lib/pkg-root.js';
+import { resolveAsset } from '~/lib/pkg-root.js';
 import type { VehicleType } from '~/types.js';
 
 type Flavor = '' | 'clear';
@@ -15,11 +15,11 @@ const TYPE_MAP: Record<VehicleType, string> = {
   SPG: 'at',
 };
 
-const projectRoot = findPkgRoot(new URL(import.meta.url));
+const selfUrl = new URL(import.meta.url);
 
 export function preRenderedBackground(version: number, flavor: Flavor = ''): LayerFactory {
   const cache = new Map<string, LayerRenderResult>();
-  const dir = resolve(projectRoot, `assets/pogs-fixed/pre-rendered/combined-v${version}`);
+  const dir = resolveAsset(selfUrl, `pogs-fixed/pre-rendered/combined-v${version}`);
 
   return async (box, _prev, vehicle) => {
     if (version === 1) {
