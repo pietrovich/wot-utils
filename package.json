@@ -5,7 +5,7 @@
   },
   "private": false,
   "repository": "github:pietrovich/wot-utils",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "description": "CLI utilities for World of Tanks data and assets",
   "type": "module",
   "bin": {
