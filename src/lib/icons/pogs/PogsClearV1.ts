@@ -8,8 +8,7 @@ import { nameText } from '~/lib/icons/layers/name-text.js';
 import { createAligner } from '~/lib/box-utils/index.js';
 import type { IconBuilder } from '~/lib/icons/pogs/icon-builder.js';
 
-const tierTextAligner = createAligner(PogsConstants, 'tm.+', [10, 5]);
-const iconAligner = createAligner(PogsConstants, 'bl.+', [18, '(bh - 1).+']);
+const iconAligner = createAligner(PogsConstants, 'bl.+', [ 18, '(bh - 1).+' ]);
 
 export class PogsClearV1 implements IconBuilder {
   protected readonly version: number = 1;
@@ -17,7 +16,12 @@ export class PogsClearV1 implements IconBuilder {
   createBaker(app: WGData): ImageBaker {
     return new ImageBaker(
       PogsConstants,
-      [preRenderedBackground(this.version, 'clear'), vehicleIcon(app, iconAligner), tierText(tierTextAligner), nameText()],
+      [
+        preRenderedBackground(this.version, 'clear'),
+        vehicleIcon(app, iconAligner),
+        tierText(),
+        nameText(),
+      ],
     );
   }
 }
