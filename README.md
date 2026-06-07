@@ -49,9 +49,49 @@ pie-wot icon render <query>       # render a vehicle icon: type background + sho
 pie-wot font render [font] [text] # render text as PNG using a pixel font
 
 pie-wot cache purge               # clear the local API response cache
+
+pie-wot bake <script>             # run a bundled build script (see below)
 ```
 
 Vehicle commands accept `--app-id <id>` (overrides `WG_APP_ID`) and `--no-cache`.
+
+### bake
+
+Runs a bundled shell script that drives the full icon-bake pipeline. All arguments after the script name are forwarded to the script unchanged.
+
+```bash
+pie-wot bake clear --src ./in/wot-2.3/ --out ./out/clear
+pie-wot bake color --src ./in/wot-2.3/ --out ./out/color
+```
+
+Available scripts:
+
+| Name | Description |
+|------|-------------|
+| `clear` | PogS clear variant (no colour background) |
+| `color` | PogS colour variant with DMG/FSR/VR/RLD labels |
+
+## Development
+
+### Running from source
+
+No build step needed — `tsx` runs TypeScript directly:
+
+```bash
+npm start -- <command>
+# e.g.
+npm start -- vehicle list
+```
+
+### LOCAL_DEV
+
+The bundled baker scripts (`scripts/`) detect whether the `pie-wot` global binary is available and use it by default. Set `LOCAL_DEV=true` in your `.env` (or environment) to force them to use `npm start` from the local clone instead:
+
+```
+LOCAL_DEV=true
+```
+
+This is useful when iterating on the CLI itself — changes to `src/` take effect immediately without a publish/reinstall cycle.
 
 ## How it works
 
