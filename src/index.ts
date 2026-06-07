@@ -1,5 +1,19 @@
+import { createRequire } from 'node:module';
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
+
+declare const __PKG_VERSION__: string;
+
+// DEV_ONLY is a labeled block dropped by esbuild at build time (see tsup.config.ts → esbuildOptions.dropLabels).
+// In dev (tsx), it runs and reads the version from package.json via createRequire.
+// In the built binary, the block is stripped and __PKG_VERSION__ — inlined as a string literal
+// via tsup define — is used instead. The || short-circuit prevents __PKG_VERSION__ from being
+// evaluated in tsx mode where it is not defined.
+let _version = '';
+DEV_ONLY: {
+  _version = (createRequire(import.meta.url)('../package.json') as { version: string }).version;
+}
+const version = _version || __PKG_VERSION__;
 config({ path: resolve(process.env.PIE_WOT_CWD ?? process.cwd(), '.env') });
 import { Command } from 'commander';
 import { WGData } from '~/lib/WGData.js';
@@ -34,7 +48,7 @@ const program = new Command();
 program
   .name('pie-wot')
   .description('CLI utilities for World of Tanks data and assets')
-  .version('0.1.8')
+  .version(version)
   .enablePositionalOptions();
 
 const vehicle = new Command('vehicle').description('WoT vehicle data');
