@@ -10,21 +10,15 @@ export function tierText(aligner: Aligner = defaultAligner): LayerFactory {
 
   return async (_box, _prev, vehicle) => {
     let rendered = cache.get(vehicle.tier);
-    const text = String(vehicle.tier);
-    let width = 0;
-    let height = 0;
 
-    if (!rendered) {
-      const fontName = vehicle.tier > 12
-        ? 'pogsNumbersBold'
-        : 'pogsNumbers';
-
-      rendered = await renderWithShadow(fontName, text);
+    if (rendered === undefined) {
+      const fontName = vehicle.tier > 12 ? 'pogsNumbersBold' : 'pogsNumbers';
+      rendered = await renderWithShadow(fontName, String(vehicle.tier));
       cache.set(vehicle.tier, rendered);
-      width = rendered.width;
-      height = rendered.height;
     }
 
+    const { width, height } = rendered;
+    const text = String(vehicle.tier);
     const { left, top } = aligner.align(rendered);
 
     return {
