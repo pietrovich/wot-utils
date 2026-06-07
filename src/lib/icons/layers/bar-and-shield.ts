@@ -1,10 +1,9 @@
-import { resolve } from 'node:path';
 import sharp from 'sharp';
-import { findPkgRoot } from '~/lib/pkg-root.js';
+import { resolveAsset } from '~/lib/pkg-root.js';
 import type { LayerFactory, LayerRenderResult } from '~/lib/icons/layer-factory.js';
 
-const SHIELD_PATH = resolve(findPkgRoot(new URL(import.meta.url)), 'assets/pogs/sheild.png');
-const STRIPE_PATH = resolve(findPkgRoot(new URL(import.meta.url)), 'assets/pogs/stripe.png');
+const SHIELD_PATH = resolveAsset(new URL(import.meta.url), 'pogs/sheild.png');
+const STRIPE_PATH = resolveAsset(new URL(import.meta.url), 'pogs/stripe.png');
 
 export function barAndShield(): LayerFactory {
   const cache = new Map<string, LayerRenderResult>();

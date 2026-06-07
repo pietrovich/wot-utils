@@ -4,25 +4,25 @@ A CLI toolkit for World of Tanks modders. Fetches live vehicle data from the War
 
 The long-term goal is to make it trivial to maintain and publish a custom icon set: when new vehicles are added to the game or tank characteristics change, re-running a handful of commands should be enough to produce an updated, publish-ready set. The [PogS icon set](https://github.com/pavelmaca/WoT-PogsIconSet) by @pavelmaca serves as the reference implementation and first supported style.
 
+## Pre-baked ready to use sets
+
+If you just want the icons without running the pipeline yourself, pre-baked sets are published periodically at [pietrovich/wot-pogs-like-icon-sets](https://github.com/pietrovich/wot-pogs-like-icon-sets) and kept in sync with game updates.
+
 ## Install
 
 ```bash
-git clone https://github.com/pietrovich/wot-utils.git
-cd wot-utils
-npm install
-npm run build         # compile to dist/
-npm link              # registers pie-wot in your PATH
+npm install -g @pietrovich/pie-wot-utils
 cp .env.example .env  # add your WG_APP_ID
 ```
 
 Get a free application ID at [developers.wargaming.net](https://developers.wargaming.net/).
 
-> **Node.js ≥ 24** required. No build step — `tsx` runs TypeScript directly.
+> **Node.js ≥ 24** required.
 
 ## Uninstall
 
 ```bash
-npm unlink -g pie-wot-utils   # removes pie-wot from PATH
+npm uninstall -g @pietrovich/pie-wot-utils
 ```
 
 ## Commands
@@ -49,9 +49,49 @@ pie-wot icon render <query>       # render a vehicle icon: type background + sho
 pie-wot font render [font] [text] # render text as PNG using a pixel font
 
 pie-wot cache purge               # clear the local API response cache
+
+pie-wot bake <script>             # run a bundled build script (see below)
 ```
 
 Vehicle commands accept `--app-id <id>` (overrides `WG_APP_ID`) and `--no-cache`.
+
+### bake
+
+Runs a bundled shell script that drives the full icon-bake pipeline. All arguments after the script name are forwarded to the script unchanged.
+
+```bash
+pie-wot bake clear --src ./in/wot-2.3/ --out ./out/clear
+pie-wot bake color --src ./in/wot-2.3/ --out ./out/color
+```
+
+Available scripts:
+
+| Name | Description |
+|------|-------------|
+| `clear` | PogS clear variant (no colour background) |
+| `color` | PogS colour variant with DMG/FSR/VR/RLD labels |
+
+## Development
+
+### Running from source
+
+No build step needed — `tsx` runs TypeScript directly:
+
+```bash
+npm start -- <command>
+# e.g.
+npm start -- vehicle list
+```
+
+### LOCAL_DEV
+
+The bundled baker scripts (`scripts/`) detect whether the `pie-wot` global binary is available and use it by default. Set `LOCAL_DEV=true` in your `.env` (or environment) to force them to use `npm start` from the local clone instead:
+
+```
+LOCAL_DEV=true
+```
+
+This is useful when iterating on the CLI itself — changes to `src/` take effect immediately without a publish/reinstall cycle.
 
 ## How it works
 

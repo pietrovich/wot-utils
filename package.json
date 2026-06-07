@@ -1,11 +1,18 @@
 {
-  "name": "pie-wot-utils",
-  "version": "0.1.0",
+  "name": "@pietrovich/pie-wot-utils",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.1.8",
   "description": "CLI utilities for World of Tanks data and assets",
   "type": "module",
   "bin": {
     "pie-wot": "dist/index.js"
   },
+  "files": [
+    "./dist",
+    "./scripts"
+  ],
   "scripts": {
     "build": "tsup",
     "start": "tsx src/index.ts",

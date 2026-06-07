@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { writeFile, access } from 'node:fs/promises';
-import { join, basename } from 'node:path';
+import { isAbsolute, join, basename, resolve } from 'node:path';
 import sharp from 'sharp';
 import { getAppId } from '~/lib/config.js';
 import { WGApiError } from '~/lib/api.js';
@@ -44,7 +44,10 @@ export class WGData {
   constructor() {
     this.appId = getAppId();
     this.limitOutput = process.env.LIMIT_OUTPUT ? Number(process.env.LIMIT_OUTPUT) : 3;
-    const cacheDir = process.env.WG_CACHE_DIR ?? '.data/cache';
+    const rawCacheDir = process.env.WG_CACHE_DIR ?? '.data/wg/cache';
+    const cacheDir = isAbsolute(rawCacheDir)
+      ? rawCacheDir
+      : resolve(process.env.PIE_WOT_CWD ?? process.cwd(), rawCacheDir);
     this.iconsBaseDir = join(cacheDir, '..', 'icons');
     for (const size of Object.keys(IMAGE_KEY) as VehicleIconSize[]) {
       mkdirSync(join(this.iconsBaseDir, size), { recursive: true });

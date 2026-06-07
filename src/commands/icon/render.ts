@@ -13,7 +13,7 @@ import { PogsClearV2 } from '~/lib/icons/pogs/PogsClearV2.js';
 import { PogsColorV1 } from '~/lib/icons/pogs/PogsColorV1.js';
 import { PogsColorV2 } from '~/lib/icons/pogs/PogsColorV2.js';
 
-type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean; bg?: string; preRenderedBg?: string };
+type Options = { color?: boolean; clear?: boolean; to?: string; create?: boolean; all?: boolean; bg?: string; preRenderedBg?: string };
 
 const CONCURRENCY = 5;
 
@@ -28,7 +28,8 @@ export function iconRenderCommand(app: WGData): Command {
     .description('Render a vehicle icon with its short name label composited over a type background')
     .argument('[query]', 'tank_id (number), tag, or short_name')
     .option('--all', 'render all vehicles')
-    .option('--color', 'use color variant (gradient background)')
+    .option('--color', 'use color variant (default)')
+    .option('--clear', 'use clear variant (no color background)')
     .option('--bg <version>', 'use pre-rendered background at given version')
     .option('--pre-rendered-bg <version>', 'alias for --bg')
     .option('--to <dir>', 'output directory (default: current working directory)')
@@ -51,18 +52,20 @@ export function iconRenderCommand(app: WGData): Command {
           mkdirSync(outDir, { recursive: true });
         }
 
-        const bgVersion = options.bg ?? options.preRenderedBg;
+        const bgVersion = options.bg ?? options.preRenderedBg ?? (options.clear ? 'v2' : undefined);
         let builder: IconBuilder;
+
+        const useColor = !options.clear;
 
         if (bgVersion !== undefined) {
           const version = parseInt(bgVersion.replace(/\D+/g, ''), 10);
           if (version === 1) {
-            builder = options.color ? new PogsColorV1() : new PogsClearV1();
+            builder = useColor ? new PogsColorV1() : new PogsClearV1();
           } else {
-            builder = options.color ? new PogsColorV2() : new PogsClearV2();
+            builder = useColor ? new PogsColorV2() : new PogsClearV2();
           }
         } else {
-          builder = options.color ? new PogsColor() : new PogsClear();
+          builder = useColor ? new PogsColor() : new PogsClear();
         }
 
         const vehicles: Vehicle[] = options.all

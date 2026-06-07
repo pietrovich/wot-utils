@@ -1,9 +1,13 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { isAbsolute, join, resolve } from 'node:path';
 
 function getCacheDir(): string {
-  return process.env.WG_CACHE_DIR ?? '.data/cache';
+  const dir = process.env.WG_CACHE_DIR ?? '.data/cache';
+  if (isAbsolute(dir)) {
+    return dir;
+  }
+  return resolve(process.env.PIE_WOT_CWD ?? process.cwd(), dir);
 }
 
 function cacheKey(prefix: string, endpoint: string, params: Record<string, string>): string {

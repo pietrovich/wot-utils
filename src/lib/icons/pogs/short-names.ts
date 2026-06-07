@@ -1,10 +1,12 @@
-import { readFileSync, writeFileSync } from 'fs';
-import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync } from 'node:fs';
 import JSON5 from 'json5';
 import type { Vehicle } from '~/types.js';
+import { resolveAsset } from '~/lib/pkg-root.js';
 
-const filePath = fileURLToPath(new URL('./short-names.json5', import.meta.url));
-const dict: Record<string, string> = JSON5.parse(readFileSync(filePath, 'utf8'));
+const shortNamesPath = resolveAsset(new URL(import.meta.url), 'pogs', 'short-names.json5');
+const dict: Record<string, string> = {
+  ...(JSON5.parse(readFileSync(shortNamesPath, 'utf8')) as Record<string, string>),
+};
 
 export function lookupShortName(vehicle: Vehicle): string {
   return dict[vehicle.tag] ?? vehicle.short_name;
@@ -22,5 +24,5 @@ export function save(): void {
   const sorted = Object.fromEntries(
     Object.entries(dict).sort(([, a], [, b]) => b.length - a.length),
   );
-  writeFileSync(filePath, JSON.stringify(sorted, null, 2) + '\n', 'utf8');
+  writeFileSync(shortNamesPath, JSON.stringify(sorted, null, 2) + '\n', 'utf8');
 }
