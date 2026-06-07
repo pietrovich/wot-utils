@@ -1,9 +1,9 @@
 {
   "name": "@pietrovich/pie-wot-utils",
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "CLI utilities for World of Tanks data and assets",
   "type": "module",
   "bin": {

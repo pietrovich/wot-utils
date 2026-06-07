@@ -34,7 +34,7 @@ const program = new Command();
 program
   .name('pie-wot')
   .description('CLI utilities for World of Tanks data and assets')
-  .version('0.1.0')
+  .version('0.1.8')
   .enablePositionalOptions();
 
 const vehicle = new Command('vehicle').description('WoT vehicle data');
