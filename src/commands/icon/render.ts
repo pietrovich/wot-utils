@@ -17,8 +17,8 @@ type Options = { color?: boolean; to?: string; create?: boolean; all?: boolean; 
 
 const CONCURRENCY = 5;
 
-async function renderOne(vehicle: Vehicle, baker: ImageBaker, outDir: string): Promise<void> {
-  const outPath = join(outDir, `${vehicle.tag}.png`);
+async function renderOneToFile(vehicle: Vehicle, baker: ImageBaker, outDir: string): Promise<void> {
+  const outPath = join(outDir, `${vehicle.nation}-${vehicle.tag}.png`);
   const info = await (await baker.bake(vehicle)).png().toFile(outPath);
   console.log(`${outPath} — ${info.width}×${info.height}px`);
 }
@@ -76,7 +76,7 @@ export function iconRenderCommand(app: WGData): Command {
           bakers.map(async (baker) => {
             while (idx < vehicles.length) {
               const vehicle = vehicles[idx++];
-              await renderOne(vehicle, baker, outDir);
+              await renderOneToFile(vehicle, baker, outDir);
             }
           }),
         );
