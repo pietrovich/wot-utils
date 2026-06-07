@@ -73,6 +73,8 @@ export function vehicleStatsCommand(app: WGData): Command {
     .description('Fetch stats for the best module configuration of a vehicle')
     .argument('[query]', 'tank_id (number), tag, or short_name')
     .option('--all', 'fetch stats for all vehicles and print as a table')
+    .option('-q, --quiet', 'suppress progress output')
+    .option('--json', 'output results as JSON array instead of a table (use with --all)')
     .option('--raw', 'print full JSON response (single vehicle only)')
     .action(async (query: string | undefined, options) => {
       try {
@@ -86,7 +88,7 @@ export function vehicleStatsCommand(app: WGData): Command {
 
           for (let i = 0; i < targets.length; i += batchSize) {
             const batch = targets.slice(i, i + batchSize);
-            if (!options.raw) {
+            if (!options.raw && !options.quiet) {
               console.error(`${i + 1}–${Math.min(i + batchSize, targets.length)} / ${targets.length}`);
             }
 
@@ -116,7 +118,11 @@ export function vehicleStatsCommand(app: WGData): Command {
             }
           }
 
-          printTable(rows);
+          if (options.json) {
+            console.log(JSON.stringify(rows, null, 2));
+          } else {
+            printTable(rows);
+          }
 
           return;
         }
