@@ -4,6 +4,10 @@ A CLI toolkit for World of Tanks modders. Fetches live vehicle data from the War
 
 The long-term goal is to make it trivial to maintain and publish a custom icon set: when new vehicles are added to the game or tank characteristics change, re-running a handful of commands should be enough to produce an updated, publish-ready set. The [PogS icon set](https://github.com/pavelmaca/WoT-PogsIconSet) by @pavelmaca serves as the reference implementation and first supported style.
 
+## Pre-baked ready to use sets
+
+If you just want the icons without running the pipeline yourself, pre-baked sets are published periodically at [pietrovich/wot-pogs-like-icon-sets](https://github.com/pietrovich/wot-pogs-like-icon-sets) and kept in sync with game updates.
+
 ## Install
 
 ```bash
