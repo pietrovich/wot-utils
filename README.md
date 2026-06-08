@@ -11,7 +11,7 @@ If you just want the icons without running the pipeline yourself, pre-baked sets
 ## Install
 
 ```bash
-npm install -g @pietrovich/pie-wot-utils
+npm install -g @pietrovich/wot-utils
 cp .env.example .env  # add your WG_APP_ID
 ```
 
@@ -22,7 +22,7 @@ Get a free application ID at [developers.wargaming.net](https://developers.warga
 ## Uninstall
 
 ```bash
-npm uninstall -g @pietrovich/pie-wot-utils
+npm uninstall -g @pietrovich/wot-utils
 ```
 
 ## Commands
