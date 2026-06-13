@@ -19,5 +19,6 @@ export async function convertToPngFile(file: string, pngFileName?: string): Prom
   const outPath = join(dirname(file), outName);
 
   await writeFile(outPath, PNG.sync.write(png));
+
   return outPath;
 }

@@ -7,6 +7,7 @@ function getCacheDir(): string {
   if (isAbsolute(dir)) {
     return dir;
   }
+
   return resolve(process.env.PIE_WOT_CWD ?? process.cwd(), dir);
 }
 
