@@ -13,8 +13,7 @@
   },
   "files": [
     "./.env.example",
-    "./dist",
-    "./scripts"
+    "./dist"
   ],
   "scripts": {
     "build": "tsup",
