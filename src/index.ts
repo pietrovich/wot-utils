@@ -43,7 +43,7 @@ import { tomatoFetchCommand } from '~/commands/tomato/fetch.js';
 import { bakeCommand } from '~/commands/bake/run.js';
 import { extractIconAssetsCommand } from '~/commands/game/extract-icon-assets.js';
 
-const app = new WGData();
+const wgData = new WGData();
 const atlasManager = new AtlasManager();
 const tomatoApi = new TomatoApi();
 const program = new Command();
@@ -55,12 +55,12 @@ program
   .enablePositionalOptions();
 
 const vehicle = new Command('vehicle').description('WoT vehicle data');
-vehicle.addCommand(listVehiclesCommand(app));
-vehicle.addCommand(exportCommand(app));
-vehicle.addCommand(vehicleStatsCommand(app));
-vehicle.addCommand(bestConfigCommand(app));
-vehicle.addCommand(charsCommand(app));
-vehicle.addCommand(longAliasesCommand(app));
+vehicle.addCommand(listVehiclesCommand(wgData));
+vehicle.addCommand(exportCommand(wgData));
+vehicle.addCommand(vehicleStatsCommand(wgData));
+vehicle.addCommand(bestConfigCommand(wgData));
+vehicle.addCommand(charsCommand(wgData));
+vehicle.addCommand(longAliasesCommand(wgData));
 
 const atlas = new Command('atlas').description('Texture atlas tools');
 atlas.addCommand(inspectAtlasCommand(atlasManager));
@@ -72,7 +72,7 @@ const font = new Command('font').description('Pixel font tools');
 font.addCommand(renderCommand());
 
 const cache = new Command('cache').description('API response cache');
-cache.addCommand(cachePurgeCommand(app));
+cache.addCommand(cachePurgeCommand(wgData));
 
 const dds = new Command('dds').description('DDS texture tools');
 dds.addCommand(ddsDecodeCommand());
@@ -86,16 +86,16 @@ program.addCommand(dds);
 
 const icon = new Command('icon').description('Vehicle icon generation tools');
 icon.addCommand(dumpBackgroundCommand());
-icon.addCommand(iconRenderCommand(app));
-icon.addCommand(iconFetchCommand(app));
-icon.addCommand(iconShrinkCommand(app));
+icon.addCommand(iconRenderCommand(wgData));
+icon.addCommand(iconFetchCommand(wgData));
+icon.addCommand(iconShrinkCommand(wgData));
 program.addCommand(icon);
 
 const tomato = new Command('tomato').description('Tomato.gg data fetcher');
-tomato.addCommand(tomatoFetchCommand(app, tomatoApi));
+tomato.addCommand(tomatoFetchCommand(wgData, tomatoApi));
 program.addCommand(tomato);
 
-program.addCommand(bakeCommand());
+program.addCommand(bakeCommand(wgData, atlasManager));
 
 const game = new Command('game').description('WoT game installation tools');
 game.addCommand(extractIconAssetsCommand());
