@@ -35,6 +35,9 @@ pie-wot vehicle stats             # short-name character statistics
 pie-wot vehicle best-config       # best module configuration per vehicle
 pie-wot vehicle chars             # character distribution in short names
 
+pie-wot game extract-icon-assets  # extract battle atlas files from a WoT installation
+pie-wot game extract-icons        # (alias for extract-icon-assets)
+
 pie-wot atlas inspect <map>       # list texture names in an atlas XML
 pie-wot atlas pick <map> <img>    # extract a single named texture
 pie-wot atlas extract             # extract all textures to a directory
@@ -70,6 +73,31 @@ Available scripts:
 |------|-------------|
 | `clear` | PogS clear variant (no colour background) |
 | `color` | PogS colour variant with DMG/FSR/VR/RLD labels |
+
+### Customizing battle atlases
+
+To replace vehicle icons in the Player Panels on the battle screen, you need to work with the game's atlas files. 
+These are large texture sheets containing many icons packed together, defined by an XML location map.
+
+**Step 1: Extract original atlases from the game installation**
+
+```bash
+pie-wot game extract-icon-assets /path/to/wot /path/to/atlas-work
+```
+
+This extracts four files and converts the DDS textures to PNG for easier manipulation:
+- `battleAtlas.dds` (Player Panel icons)
+- `battleAtlas.xml` (location map)
+- `battleAtlas.dds` → `battleAtlas.png` 
+- `vehicleMarkerAtlas.dds` (vehicle marker icons)
+- `vehicleMarkerAtlas.xml` (location map)
+- `vehicleMarkerAtlas.dds` → `vehicleMarkerAtlas.png` 
+
+**Step 2–4: Split, replace, reassemble**
+
+Use the XML files to split the atlases into individual icon pieces, replace them with your custom versions, 
+and reassemble into new atlases. The final PNG can be saved with a `.dds` extension — the game will load 
+PNG-compressed assets transparently, giving you better quality than DDS without needing to encode to DXT5.
 
 ## Development
 

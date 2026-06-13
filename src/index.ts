@@ -7,13 +7,15 @@ declare const __PKG_VERSION__: string;
 // DEV_ONLY is a labeled block dropped by esbuild at build time (see tsup.config.ts → esbuildOptions.dropLabels).
 // In dev (tsx), it runs and reads the version from package.json via createRequire.
 // In the built binary, the block is stripped and __PKG_VERSION__ — inlined as a string literal
-// via tsup define — is used instead. The || short-circuit prevents __PKG_VERSION__ from being
+// via tsup 'define' — is used instead. The || short-circuit prevents __PKG_VERSION__ from being
 // evaluated in tsx mode where it is not defined.
 let _version = '';
 DEV_ONLY: {
   _version = (createRequire(import.meta.url)('../package.json') as { version: string }).version;
 }
+
 const version = _version || __PKG_VERSION__;
+
 config({ path: resolve(process.env.PIE_WOT_CWD ?? process.cwd(), '.env') });
 import { Command } from 'commander';
 import { WGData } from '~/lib/WGData.js';
@@ -39,6 +41,7 @@ import { iconShrinkCommand } from '~/commands/icon/shrink.js';
 import { TomatoApi } from '~/lib/tomato-api.js';
 import { tomatoFetchCommand } from '~/commands/tomato/fetch.js';
 import { bakeCommand } from '~/commands/bake/run.js';
+import { extractIconAssetsCommand } from '~/commands/game/extract-icon-assets.js';
 
 const app = new WGData();
 const atlasManager = new AtlasManager();
@@ -93,5 +96,9 @@ tomato.addCommand(tomatoFetchCommand(app, tomatoApi));
 program.addCommand(tomato);
 
 program.addCommand(bakeCommand());
+
+const game = new Command('game').description('WoT game installation tools');
+game.addCommand(extractIconAssetsCommand());
+program.addCommand(game);
 
 await program.parseAsync();
